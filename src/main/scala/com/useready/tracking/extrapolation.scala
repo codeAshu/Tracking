@@ -118,7 +118,7 @@ object extrapolation {
     /*
 TODO :So based on the extrapolation window, decide the value of window
 to smooth the analysis
-day:window :10
+day:window :
 fortnight :50
 month :100
 year :500
