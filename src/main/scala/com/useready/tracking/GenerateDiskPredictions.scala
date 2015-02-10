@@ -7,12 +7,12 @@ import org.joda.time.DateTime
 /**
  * Created by abhilasha on 10-02-2015.
  */
-object GenerateCPUPredictions {
+object GenerateDiskPredictions {
 
-  def getPrediction(cpuLogs: RDD[CPULog], sc: SparkContext, extrapolationType: String, extrapolationDuration: String)
+  def getPrediction(diskLogs: RDD[DiskLog], sc: SparkContext, extrapolationType: String, extrapolationDuration: String)
   : IndexedSeq[Double] = {
 
-//    val window = 10
+    //    val window = 10
 
     var prediction: IndexedSeq[Double] = null
     /*
@@ -28,10 +28,10 @@ object GenerateCPUPredictions {
         Year prediction
          */
     if (extrapolationDuration.equals("yearly")) {
-       val labeledLogs = DataPreparationCPU.movingAverageOfCPULogs(cpuLogs.filter(line => line.dateTime.
-         isAfter( DateTime.now.minusYears(1) )),25)
-//      val labeledLogs = DataPreparation.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
-//        isAfter(DateTime.now.minusYears(1))))
+      val labeledLogs = DataPreparationDisk.movingAverageOfDiskLogs(diskLogs.filter(line => line.dateTime.
+        isAfter( DateTime.now.minusYears(1) )),25)
+      //      val labeledLogs = DataPreparation.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
+      //        isAfter(DateTime.now.minusYears(1))))
 
       prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
     }
@@ -41,7 +41,7 @@ object GenerateCPUPredictions {
      */
     if(extrapolationDuration.equals("monthly"))
     {
-      val labeledLogs = DataPreparationCPU.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
+      val labeledLogs = DataPreparationDisk.labeledPointRDDOfDiskLogs(diskLogs.filter(line => line.dateTime.
         isAfter(DateTime.now.minusMonths(1))))
 
       prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
@@ -52,7 +52,7 @@ object GenerateCPUPredictions {
      */
     if(extrapolationDuration.equals("weekly"))
     {
-      val labeledLogs = DataPreparationCPU.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
+      val labeledLogs = DataPreparationDisk.labeledPointRDDOfDiskLogs(diskLogs.filter(line => line.dateTime.
         isAfter(DateTime.now.minusWeeks(1))))
 
       prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
@@ -63,7 +63,7 @@ object GenerateCPUPredictions {
      */
     if(extrapolationDuration.equals("fortnightly"))
     {
-      val labeledLogs = DataPreparationCPU.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
+      val labeledLogs = DataPreparationDisk.labeledPointRDDOfDiskLogs(diskLogs.filter(line => line.dateTime.
         isAfter(DateTime.now.minusWeeks(2))))
 
       prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
@@ -74,7 +74,7 @@ object GenerateCPUPredictions {
      */
     if(extrapolationDuration.equals("daily"))
     {
-      val labeledLogs = DataPreparationCPU.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
+      val labeledLogs = DataPreparationDisk.labeledPointRDDOfDiskLogs(diskLogs.filter(line => line.dateTime.
         isAfter(DateTime.now.minusDays(1))))
 
       prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
