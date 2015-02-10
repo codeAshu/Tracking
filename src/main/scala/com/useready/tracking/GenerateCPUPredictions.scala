@@ -65,7 +65,7 @@ object GenerateCPUPredictions {
         Year prediction
          */
     if (extrapolationDuration.equals("yearly")) {
-       val labeledLogs = DataPreparation.movingAverageOfCPULogs(cpuLogs.filter(line => line.dateTime.
+       val labeledLogs = dataPreparation.movingAverageOfCPULogs(cpuLogs.filter(line => line.dateTime.
          isAfter( DateTime.now.minusYears(1) )),25)
 //      val labeledLogs = DataPreparation.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
 //        isAfter(DateTime.now.minusYears(1))))
@@ -78,7 +78,7 @@ object GenerateCPUPredictions {
      */
     if(extrapolationDuration.equals("monthly"))
     {
-      val labeledLogs = DataPreparation.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
+      val labeledLogs = dataPreparation.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
         isAfter(DateTime.now.minusMonths(1))))
 
       prediction = GenerateCPUPredictions.extrapolateCPULogs(labeledLogs, sc, extrapolationType)
@@ -89,7 +89,7 @@ object GenerateCPUPredictions {
      */
     if(extrapolationDuration.equals("weekly"))
     {
-      val labeledLogs = DataPreparation.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
+      val labeledLogs = dataPreparation.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
         isAfter(DateTime.now.minusWeeks(1))))
 
       prediction = GenerateCPUPredictions.extrapolateCPULogs(labeledLogs, sc, extrapolationType)
@@ -100,7 +100,7 @@ object GenerateCPUPredictions {
      */
     if(extrapolationDuration.equals("fortnightly"))
     {
-      val labeledLogs = DataPreparation.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
+      val labeledLogs = dataPreparation.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
         isAfter(DateTime.now.minusWeeks(2))))
 
       prediction = GenerateCPUPredictions.extrapolateCPULogs(labeledLogs, sc, extrapolationType)
@@ -111,7 +111,7 @@ object GenerateCPUPredictions {
      */
     if(extrapolationDuration.equals("daily"))
     {
-      val labeledLogs = DataPreparation.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
+      val labeledLogs = dataPreparation.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
         isAfter(DateTime.now.minusDays(1))))
 
       prediction = GenerateCPUPredictions.extrapolateCPULogs(labeledLogs, sc, extrapolationType)
