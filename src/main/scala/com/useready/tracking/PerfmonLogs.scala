@@ -4,7 +4,6 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 
 
-
 /*
 Class for Disk performance logs
  */
@@ -19,6 +18,16 @@ case class CPULog(worker: String, dateTime: DateTime,
                   total: Double , used: Double, available: Double ) {
 
 }
+
+
+/*
+Class for RAM performance logs
+ */
+case class RAMLog(worker: String, dateTime: DateTime,
+                  total: Double , used: Double, available: Double ) {
+
+}
+
 
 object PerfmonLogs {
   /**
