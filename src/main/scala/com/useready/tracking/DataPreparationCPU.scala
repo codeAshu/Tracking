@@ -7,7 +7,7 @@ import org.apache.spark.rdd.RDD
 /**
  * Created by abhilasha on 10-02-2015.
  */
-object dataPreparation {
+object DataPreparationCPU {
 
   /*
 This method takes the RDD of CPU logs, does a moving average on the logs and returns a
