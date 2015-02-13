@@ -10,29 +10,14 @@ object CheckThreshold {
   final val DiskThreshold = 75
 
   def cpuThresholdCrossed(predictedValues: IndexedSeq[Double]) : Boolean = {
-
-    if(predictedValues.max > CPUThreshold){
-      return true
-    }
-    else
-      return false
+    predictedValues.max > CPUThreshold
   }
 
   def ramThresholdCrossed(predictedValues: IndexedSeq[Double]) : Boolean = {
-
-    if(predictedValues.max > RAMThreshold){
-      return true
-    }
-    else
-      return false
+    predictedValues.max > RAMThreshold
   }
 
   def diskThresholdCrossed(predictedValues: IndexedSeq[Double]) : Boolean = {
-
-    if(predictedValues.max > DiskThreshold){
-      return true
-    }
-    else
-      return false
+    predictedValues.max > DiskThreshold
   }
 }

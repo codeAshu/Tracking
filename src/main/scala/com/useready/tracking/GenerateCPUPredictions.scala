@@ -10,8 +10,17 @@ import org.joda.time.DateTime
  * Created by abhilasha on 10-02-2015.
  */
 object GenerateCPUPredictions {
-
-  def extrapolateCPULogs(logs: RDD[LabeledPoint], sc: SparkContext, extrapolationType: String) : IndexedSeq[Double] = {
+  /**
+   * This function takes the labeled point RDD and call the extrapolation function
+   * based on extrapolation type
+   * @param logs RDD of labeled point
+   * @param sc Spark context
+   * @param extrapolationType type of algorithm to choose for extrapolation
+   * @return
+   */
+  def extrapolateCPULogs(logs: RDD[LabeledPoint],
+                         sc: SparkContext,
+                         extrapolationType: String) : IndexedSeq[Double] = {
 
     //count of cpu logs
     val nCpuLogs = logs.count()
@@ -41,31 +50,35 @@ object GenerateCPUPredictions {
       val prediction =  model.predict(Vectors.dense(point))
       prediction
     }
-
-    return prediction
+   prediction
   }
 
-
-  def getPrediction(cpuLogs: RDD[CPULog], sc: SparkContext, extrapolationType: String, extrapolationDuration: String)
-  : IndexedSeq[Double] = {
-
-//    val window = 10
+  /**
+   * This function calls the data preparation function and extrapolation algorithm for the time duration
+   * given by extrapolationDuration
+   * @param cpuLogs RDD of class CpuLogs
+   * @param sc Spark Context
+   * @param extrapolationType type of algorithm
+   * @param extrapolationDuration duration of the extrapolation
+   * @return
+   */
+  def getPrediction(cpuLogs: RDD[CPULog],
+                    sc: SparkContext,
+                    extrapolationType: String,
+                    extrapolationDuration: String): IndexedSeq[Double] = {
 
     var prediction: IndexedSeq[Double] = null
     /*
-    TODO :So based on the extrapolation window, decide the value of window
-    to smooth the analysis
+    TODO :So based on the extrapolation window, decide the value of window to smooth the analysis
     day:window :
     fortnight :50
     month :100
     year :500
      */
 
-    /*
-        Year prediction
-         */
+   //here we have choice of either using moving avg or not choosig moving avg
     if (extrapolationDuration.equals("yearly")) {
-       val labeledLogs = dataPreparation.movingAverageOfCPULogs(cpuLogs.filter(line => line.dateTime.
+       val labeledLogs = dataPreparation.labeledPointRDDOfCPULogsMovingAverage(cpuLogs.filter(line => line.dateTime.
          isAfter( DateTime.now.minusYears(1) )),25)
 //      val labeledLogs = DataPreparation.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
 //        isAfter(DateTime.now.minusYears(1))))
@@ -117,8 +130,7 @@ object GenerateCPUPredictions {
       prediction = GenerateCPUPredictions.extrapolateCPULogs(labeledLogs, sc, extrapolationType)
     }
 
-
-    return prediction
+   prediction
   }
 
 }

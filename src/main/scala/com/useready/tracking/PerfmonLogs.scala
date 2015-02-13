@@ -4,14 +4,14 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 
 
-/*
+/**
 Class for Disk performance logs
  */
 case class DiskLog(worker: String, dateTime: String,
                    total: Long, used: Long, available: Long ) {
 
 }
-/*
+/**
 Class for CPU performance logs
  */
 case class CPULog(worker: String, dateTime: DateTime,
@@ -20,7 +20,7 @@ case class CPULog(worker: String, dateTime: DateTime,
 }
 
 
-/*
+/**
 Class for RAM performance logs
  */
 case class RAMLog(worker: String, dateTime: DateTime,
@@ -30,6 +30,7 @@ case class RAMLog(worker: String, dateTime: DateTime,
 
 
 object PerfmonLogs {
+
   /**
    * This function parse CPU perfmon file which has the file structure as
    * "worker","(PDH-CSV 4.0) (India Standard Time)(-330)","\\worker\Processor(_Total)\% Processor Time"s

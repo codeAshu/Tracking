@@ -9,11 +9,11 @@ import org.apache.spark.rdd.RDD
  */
 object dataPreparation {
 
-  /*
-This method takes the RDD of CPU logs, does a moving average on the logs and returns a
-new RDD of labeled points on which extrapolation can be done
-*/
-  def movingAverageOfCPULogs(cpuLgs: RDD[CPULog], window: Int) : RDD[LabeledPoint] = {
+  /**
+  This method takes the RDD of CPU logs, does a moving average on the logs and returns a
+  new RDD of labeled points on which extrapolation can be done
+  */
+  def labeledPointRDDOfCPULogsMovingAverage(cpuLgs: RDD[CPULog], window: Int) : RDD[LabeledPoint] = {
 
     //handle partitions by replicating boundaries which span across partitions
     val logs = cpuLgs.mapPartitionsWithIndex((i, p) => {
@@ -29,26 +29,22 @@ new RDD of labeled points on which extrapolation can be done
       val olds = sorted.iterator
       val news = sorted.iterator
       var sum = news.take(window - 1).sum
-      (olds zip news).map({ case (o, n) => {
+      (olds zip news).map({ case (o, n) =>
         sum += n
         val v = sum
         sum -= o
         v/window
-      }})
+      })
     })
 
-    /*
-   create LabeledPoint RDD for the extrapolation function
-   Label is just index as of now.
-    */
+//   create LabeledPoint RDD for the extrapolation function Label is just index as of now.
     val labeledLogs =  used
       .zipWithIndex()
       .map{ line =>
       val vec = Vectors.dense(line._2.toDouble)
       LabeledPoint(line._1, vec)
     }.cache()
-
-    return labeledLogs
+    labeledLogs
   }
 
   /*
@@ -63,6 +59,6 @@ new RDD of labeled points on which extrapolation can be done
       val vec = Vectors.dense(line._2.toDouble)
       LabeledPoint(line._1, vec)
     }
-    return labeledLogs
+    labeledLogs
   }
 }

@@ -39,7 +39,7 @@ object extrapolation {
 
     println(s"RMSE = $rmse.")
     sc.stop()
-    return model
+    model
   }
 
   /**
@@ -71,7 +71,7 @@ object extrapolation {
 
     println(s"RMSE = $rmse.")
     sc.stop()
-    return model
+    model
   }
 
 
@@ -104,7 +104,7 @@ object extrapolation {
 
     println(s"RMSE = $rmse.")
     sc.stop()
-    return model
+    model
   }
 
 }
