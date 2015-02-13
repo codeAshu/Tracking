@@ -7,16 +7,16 @@ import org.apache.spark.rdd.RDD
 /**
  * Created by abhilasha on 10-02-2015.
  */
-object dataPreparation {
-
+object DataPreparationDisk {
   /**
-  This method takes the RDD of CPU logs, does a moving average on the logs and returns a
-  new RDD of labeled points on which extrapolation can be done
-  */
-  def labeledPointRDDOfCPULogsMovingAverage(cpuLgs: RDD[CPULog], window: Int) : RDD[LabeledPoint] = {
+This method takes the RDD of Disk logs, does a moving average on the logs and returns a
+new RDD of labeled points on which extrapolation can be done
+*/
+  def labeledPointRDDOfDiskLogsMovingAverage(diskLgs: RDD[DiskLog],
+                                             window: Int) : RDD[LabeledPoint] = {
 
     //handle partitions by replicating boundaries which span across partitions
-    val logs = cpuLgs.mapPartitionsWithIndex((i, p) => {
+    val logs = diskLgs.mapPartitionsWithIndex((i, p) => {
       val overlap = p.take(window - 1).toArray
       val spill = overlap.iterator.map((i - 1, _))
       val keep = (overlap.iterator ++ p).map((i, _))
@@ -29,36 +29,41 @@ object dataPreparation {
       val olds = sorted.iterator
       val news = sorted.iterator
       var sum = news.take(window - 1).sum
-      (olds zip news).map({ case (o, n) =>
+      (olds zip news).map({ case (o, n) => {
         sum += n
         val v = sum
         sum -= o
         v/window
-      })
+      }})
     })
 
-//   create LabeledPoint RDD for the extrapolation function Label is just index as of now.
+    /**
+   create LabeledPoint RDD for the extrapolation function
+   Label is just index as of now.
+    */
     val labeledLogs =  used
       .zipWithIndex()
       .map{ line =>
-      val vec = Vectors.dense(line._2.toDouble)
+      val vec = Vectors.dense(line._2.toLong)
       LabeledPoint(line._1, vec)
     }.cache()
-    labeledLogs
+
+    return labeledLogs
   }
 
   /*
-  This method takes an RDD of CPU logs and creates a labeled point RDD
+  This method takes an RDD of Disk logs and creates a labeled point RDD
   that is needed for extrapolation
    */
-  def labeledPointRDDOfCPULogs(cpuLgs: RDD[CPULog]): RDD[LabeledPoint] ={
+  def labeledPointRDDOfDiskLogs(diskLgs: RDD[DiskLog]): RDD[LabeledPoint] ={
 
-    val labeledLogs =  cpuLgs.map(line => line.used)
+    val labeledLogs =  diskLgs.map(line => line.used)
       .zipWithIndex()
       .map{ line =>
-      val vec = Vectors.dense(line._2.toDouble)
+      val vec = Vectors.dense(line._2.toLong)
       LabeledPoint(line._1, vec)
     }
-    labeledLogs
+    return labeledLogs
   }
+  
 }

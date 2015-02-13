@@ -23,8 +23,31 @@ object MainClass {
     cpuLogs.foreach(println)
 
     //generate CPU logs by day, fortnight, month, year
-    val prediction = GenerateCPUPredictions.getPrediction(cpuLogs, sc, "linear","yearly")
+
+    var prediction = GenerateCPUPredictions.getPrediction(cpuLogs, sc, "linear","yearly")
+
+    //prediction.foreach(println)
+
+    var thresholdCrossed  = CheckThreshold.cpuThresholdCrossed(prediction)
+
+    println("Threshold crossed for CPU?: "+thresholdCrossed)
+
+
+
+    val diskLogs = sc.textFile("data/DISK.csv").map(PerfmonLogs.parseDiskLogLine)
+      .filter(line => line.worker!="x")
+      .cache()
+
+    //generate Disk logs by day, fortnight, month, year
+diskLogs.foreach(println)
+    prediction = GenerateDiskPredictions.getPrediction(diskLogs, sc, "linear","yearly")
+
+
     prediction.foreach(println)
+
+    thresholdCrossed  = CheckThreshold.cpuThresholdCrossed(prediction)
+
+    println("Threshold crossed for Disk?: "+thresholdCrossed)
   }
 
 }
