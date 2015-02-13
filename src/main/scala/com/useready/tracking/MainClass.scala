@@ -39,7 +39,7 @@ object MainClass {
       .cache()
 
     //generate Disk logs by day, fortnight, month, year
-diskLogs.foreach(println)
+    diskLogs.foreach(println)
     prediction = GenerateDiskPredictions.getPrediction(diskLogs, sc, "linear","yearly")
 
 
