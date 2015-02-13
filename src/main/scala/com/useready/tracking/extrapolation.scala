@@ -4,11 +4,46 @@
 package com.useready.tracking
 
 import org.apache.spark.SparkContext
+import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.optimization.SimpleUpdater
 import org.apache.spark.mllib.regression._
 import org.apache.spark.rdd.RDD
 
 object extrapolation {
+
+  def extrapolateLogs(logs: RDD[LabeledPoint], sc: SparkContext, extrapolationType: String) : IndexedSeq[Double] = {
+
+    //count of logs
+    val nLogs = logs.count()
+
+    //create extrapolation independent variable list
+    val testData = (nLogs to 2 * nLogs).map(x => x.toDouble)
+
+    //call the function to extrapolate
+    var model: GeneralizedLinearModel = null
+
+    if(extrapolationType.equals("linear")) {
+      model = extrapolation.extrapolateLinear(logs, sc)
+    }
+
+    if(extrapolationType.equals("ridge")) {
+      model = extrapolation.extrapolateRidge(logs, sc)
+    }
+
+    if(extrapolationType.equals("lasso")) {
+      model = extrapolation.extrapolateLasso(logs, sc)
+    }
+
+    //    val model = extrapolate(logs, sc)
+    println("regression model: " +model)
+
+    val prediction =  testData.map { point =>
+      val prediction =  model.predict(Vectors.dense(point))
+      prediction
+    }
+
+    prediction
+  }
 
   /**
    * This function takes a Labeled RDD and apply linear regression over it
@@ -38,7 +73,6 @@ object extrapolation {
     val rmse = math.sqrt(loss / parsedData.count())
 
     println(s"RMSE = $rmse.")
-    sc.stop()
     model
   }
 
@@ -70,7 +104,6 @@ object extrapolation {
     val rmse = math.sqrt(loss / parsedData.count())
 
     println(s"RMSE = $rmse.")
-    sc.stop()
     model
   }
 
@@ -103,7 +136,6 @@ object extrapolation {
     val rmse = math.sqrt(loss / parsedData.count())
 
     println(s"RMSE = $rmse.")
-    sc.stop()
     model
   }
 
