@@ -8,11 +8,12 @@ import org.apache.spark.rdd.RDD
  * Created by abhilasha on 10-02-2015.
  */
 object DataPreparationDisk {
-  /*
+  /**
 This method takes the RDD of Disk logs, does a moving average on the logs and returns a
 new RDD of labeled points on which extrapolation can be done
 */
-  def movingAverageOfDiskLogs(diskLgs: RDD[DiskLog], window: Int) : RDD[LabeledPoint] = {
+  def labeledPointRDDOfDiskLogsMovingAverage(diskLgs: RDD[DiskLog],
+                                             window: Int) : RDD[LabeledPoint] = {
 
     //handle partitions by replicating boundaries which span across partitions
     val logs = diskLgs.mapPartitionsWithIndex((i, p) => {
@@ -36,7 +37,7 @@ new RDD of labeled points on which extrapolation can be done
       }})
     })
 
-    /*
+    /**
    create LabeledPoint RDD for the extrapolation function
    Label is just index as of now.
     */

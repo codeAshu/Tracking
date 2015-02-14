@@ -42,7 +42,7 @@ object extrapolation {
       prediction
     }
 
-    return prediction
+    prediction
   }
 
   /**
@@ -73,8 +73,7 @@ object extrapolation {
     val rmse = math.sqrt(loss / parsedData.count())
 
     println(s"RMSE = $rmse.")
-//    sc.stop()
-    return model
+    model
   }
 
   /**
@@ -105,8 +104,7 @@ object extrapolation {
     val rmse = math.sqrt(loss / parsedData.count())
 
     println(s"RMSE = $rmse.")
-//    sc.stop()
-    return model
+    model
   }
 
 
@@ -138,8 +136,7 @@ object extrapolation {
     val rmse = math.sqrt(loss / parsedData.count())
 
     println(s"RMSE = $rmse.")
-//    sc.stop()
-    return model
+    model
   }
 
 }

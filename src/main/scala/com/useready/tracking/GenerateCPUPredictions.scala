@@ -1,6 +1,7 @@
 package com.useready.tracking
 
 import org.apache.spark.SparkContext
+import org.apache.spark.mllib.regression.{GeneralizedLinearModel, LabeledPoint}
 import org.apache.spark.rdd.RDD
 import org.joda.time.DateTime
 
@@ -8,27 +9,32 @@ import org.joda.time.DateTime
  * Created by abhilasha on 10-02-2015.
  */
 object GenerateCPUPredictions {
-
-  def getPrediction(cpuLogs: RDD[CPULog], sc: SparkContext, extrapolationType: String, extrapolationDuration: String)
-  : IndexedSeq[Double] = {
-
-//    val window = 10
+  /**
+   * This function calls the data preparation function and extrapolation algorithm for the time duration
+   * given by extrapolationDuration
+   * @param cpuLogs RDD of class CpuLogs
+   * @param sc Spark Context
+   * @param extrapolationType type of algorithm
+   * @param extrapolationDuration duration of the extrapolation
+   * @return
+   */
+  def getPrediction(cpuLogs: RDD[CPULog],
+                    sc: SparkContext,
+                    extrapolationType: String,
+                    extrapolationDuration: String): IndexedSeq[Double] = {
 
     var prediction: IndexedSeq[Double] = null
     /*
-    TODO :So based on the extrapolation window, decide the value of window
-    to smooth the analysis
+    TODO :So based on the extrapolation window, decide the value of window to smooth the analysis
     day:window :
     fortnight :50
     month :100
     year :500
      */
 
-    /*
-        Year prediction
-         */
+   //here we have choice of either using moving avg or not choosig moving avg
     if (extrapolationDuration.equals("yearly")) {
-       val labeledLogs = DataPreparationCPU.movingAverageOfCPULogs(cpuLogs.filter(line => line.dateTime.
+        val labeledLogs = DataPreparationCPU.labeledPointRDDOfCPULogsMovingAverage(cpuLogs.filter(line => line.dateTime.
          isAfter( DateTime.now.minusYears(1) )),25)
 //      val labeledLogs = DataPreparation.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
 //        isAfter(DateTime.now.minusYears(1))))
@@ -80,8 +86,7 @@ object GenerateCPUPredictions {
       prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
     }
 
-
-    return prediction
+   prediction
   }
 
 }

@@ -28,7 +28,7 @@ object GenerateDiskPredictions {
         Year prediction
          */
     if (extrapolationDuration.equals("yearly")) {
-      val labeledLogs = DataPreparationDisk.movingAverageOfDiskLogs(diskLogs.filter(line => line.dateTime.
+      val labeledLogs = DataPreparationDisk.labeledPointRDDOfDiskLogsMovingAverage(diskLogs.filter(line => line.dateTime.
         isAfter( DateTime.now.minusYears(1) )),25)
       //      val labeledLogs = DataPreparation.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
       //        isAfter(DateTime.now.minusYears(1))))
@@ -81,7 +81,7 @@ object GenerateDiskPredictions {
     }
 
 
-    return prediction
+    prediction
   }
 
 }

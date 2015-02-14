@@ -5,18 +5,13 @@ import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
 
 /**
- * Created by abhilasha on 10-02-2015.
+ * Created by Ashu on 13-02-2015.
  */
-object DataPreparationCPU {
-
-  /**
-  This method takes the RDD of CPU logs, does a moving average on the logs and returns a
-  new RDD of labeled points on which extrapolation can be done
-  */
-  def labeledPointRDDOfCPULogsMovingAverage(cpuLgs: RDD[CPULog], window: Int) : RDD[LabeledPoint] = {
+object DataPreparationRAM {
+  def labeledPointRDDOfRAMLogsMovingAverage(ramLogs: RDD[RAMLog], window: Int) : RDD[LabeledPoint] = {
 
     //handle partitions by replicating boundaries which span across partitions
-    val logs = cpuLgs.mapPartitionsWithIndex((i, p) => {
+    val logs = ramLogs.mapPartitionsWithIndex((i, p) => {
       val overlap = p.take(window - 1).toArray
       val spill = overlap.iterator.map((i - 1, _))
       val keep = (overlap.iterator ++ p).map((i, _))
@@ -24,7 +19,7 @@ object DataPreparationCPU {
     }).map(line=> line._2)
 
     //smoothed out rdd by moving average with window
-    val used =  logs.map(line => line.used).mapPartitions(p => {
+    val used =  logs.map(line => line.total).mapPartitions(p => {
       val sorted = p.toSeq.sorted
       val olds = sorted.iterator
       val news = sorted.iterator
@@ -37,7 +32,7 @@ object DataPreparationCPU {
       })
     })
 
-//   create LabeledPoint RDD for the extrapolation function Label is just index as of now.
+    //   create LabeledPoint RDD for the extrapolation function Label is just index as of now.
     val labeledLogs =  used
       .zipWithIndex()
       .map{ line =>
@@ -47,13 +42,14 @@ object DataPreparationCPU {
     labeledLogs
   }
 
+
   /**
   This method takes an RDD of CPU logs and creates a labeled point RDD
   that is needed for extrapolation
-   */
-  def labeledPointRDDOfCPULogs(cpuLgs: RDD[CPULog]): RDD[LabeledPoint] ={
+    */
+  def labeledPointRDDOfRAMLogs(ramLogs: RDD[RAMLog]) : RDD[LabeledPoint] ={
 
-    val labeledLogs =  cpuLgs.map(line => line.used)
+    val labeledLogs =  ramLogs.map(line => line.total)
       .zipWithIndex()
       .map{ line =>
       val vec = Vectors.dense(line._2.toDouble)
@@ -61,4 +57,5 @@ object DataPreparationCPU {
     }
     labeledLogs
   }
+
 }

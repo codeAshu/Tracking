@@ -4,14 +4,14 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 
 
-/*
+/**
 Class for Disk performance logs
  */
 case class DiskLog(worker: String, dateTime: DateTime,
                    total: Long, used: Long, available: Long ) {
 
 }
-/*
+/**
 Class for CPU performance logs
  */
 case class CPULog(worker: String, dateTime: DateTime,
@@ -20,16 +20,55 @@ case class CPULog(worker: String, dateTime: DateTime,
 }
 
 
-/*
+/**
 Class for RAM performance logs
  */
 case class RAMLog(worker: String, dateTime: DateTime,
-                  total: Double , used: Double, available: Double ) {
-
+                  total: Double , totalActive : Double, dataserver : Double,
+                   wgserver : Double,vizqlserver : Double,backgrounder: Double,
+                   postgres : Double, deserver64: Double, otherProcess:Double ) {
 }
 
-
 object PerfmonLogs {
+  /**
+   * This function parse RAM perfmon file which has the file structure as
+   * "worker" , "(PDH-CSV 4.0) (India Standard Time)(-330)", 	"\\PRIMARY\Process(_Total)\Private Bytes"
+   * "Total Active"	, "\\PRIMARY\Process(dataserver)\Private Bytes",
+   * "\\PRIMARY\Process(wgserver)\Private Bytes", 	"\\PRIMARY\Process(vizqlserver)\Private Bytes",
+   * "\\PRIMARY\Process(backgrounder)\Private Bytes",	"\\PRIMARY\Process(postgres)\Private Bytes",
+   * "\\PRIMARY\Process(tdeserver64)\Private Bytes",	"Other process/ Private bytes"
+   * @param log : log line as string
+   * @return  RAMLog class object
+   */
+
+  def parseRAMLogLine(log: String) : RAMLog = {
+    val logVec = log.split(",").toVector
+    val worker = logVec(0)
+
+    //unquote the string
+    val logVecUnq = logVec.map(w => w.replaceAll("^\"|\"$", ""))
+    val fm = DateTimeFormat.forPattern("MM/dd/yyyy HH:mm:ss.SSS")
+    try {
+
+      val strDateTime = logVec(1)
+      val dateTime = fm.parseDateTime(strDateTime)
+
+      //unquote the string
+       RAMLog(worker, dateTime, logVecUnq(2).toDouble,logVecUnq(3).toDouble,
+         logVecUnq(4).toDouble,logVecUnq(5).toDouble, logVecUnq(6).toDouble,
+         logVecUnq(7).toDouble,logVecUnq(8).toDouble,logVecUnq(9).toDouble,
+         logVecUnq(10).toDouble)
+
+    }catch {
+      //filter these later worker "x" is erroneous log line
+      case e: Exception =>
+        val fm = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss.SSS")
+        val defaultTime =  fm.parseDateTime("01/01/1915 19:09:47.598")
+        RAMLog("x",defaultTime,0,0,0,0,0,0,0,0,0)
+
+    }
+  }
+
   /**
    * This function parse CPU perfmon file which has the file structure as
    * "worker","(PDH-CSV 4.0) (India Standard Time)(-330)","\\worker\Processor(_Total)\% Processor Time"s
