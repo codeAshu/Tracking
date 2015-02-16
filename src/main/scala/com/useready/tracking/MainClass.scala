@@ -14,44 +14,20 @@ object MainClass {
     System.setProperty("hadoop.home.dir", "winutil\\")  //comment out for linux
     val sc = new SparkContext("local", "extrapolation")
 
-    //cpuLogs
-    val cpuLogs = sc.textFile("data/cpu.csv")
-      .map(PerfmonLogs.parseCPULogLine)
-      .filter(line => line.worker!="x")
-      .cache()
+    //open the log files for reading
+    GenerateAllPredictions.openLogFiles(sc)
 
-    cpuLogs.foreach(println)
-    //generate CPU logs by day, fortnight, month, year
-    var prediction = GenerateCPUPredictions.getPrediction(cpuLogs, sc, "linear","yearly")
-    //prediction.foreach(println)
-    var thresholdCrossed  = CheckThreshold.cpuThresholdCrossed(prediction)
-    println("Threshold crossed for CPU?: "+thresholdCrossed)
+    //generate all cpu predictions by day, week, fortnight, month and year
+    GenerateAllPredictions.generateAllCPUPredictions(sc)
 
+    //generate all disk predictions by day, week, fortnight, month and year
+    GenerateAllPredictions.generateAllDiskPredictions(sc)
 
-    //diskLogs
-    val diskLogs = sc.textFile("data/DISK.csv").map(PerfmonLogs.parseDiskLogLine)
-      .filter(line => line.worker!="x")
-      .cache()
+    //generate all ram predictions by day, week, fortnight, month and year
+    GenerateAllPredictions.generateAllRAMPredictions(sc)
 
-    //generate Disk logs by day, fortnight, month, year
-    diskLogs.foreach(println)
-    prediction = GenerateDiskPredictions.getPrediction(diskLogs, sc, "linear","yearly")
-    prediction.foreach(println)
-    thresholdCrossed  = CheckThreshold.cpuThresholdCrossed(prediction)
-    println("Threshold crossed for Disk?: "+thresholdCrossed)
-
-
-    //ramLogs
-   val ramLogs = sc.textFile("data/RAM.csv").map(PerfmonLogs.parseRAMLogLine)
-     .filter(line => line.worker!="x")
-     .cache()
-
-    ramLogs.foreach(println)
-    prediction = GenerateRAMPredictions.getPrediction(ramLogs, sc, "linear","yearly")
-    prediction.foreach(println)
-    thresholdCrossed  = CheckThreshold.ramThresholdCrossed(prediction)
-    println("Threshold crossed for RAM?: "+thresholdCrossed)
-
+    //close open file pointers
+    GenerateAllPredictions.clean()
 
   }
 
