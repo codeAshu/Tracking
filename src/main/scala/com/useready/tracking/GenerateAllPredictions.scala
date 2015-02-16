@@ -217,6 +217,7 @@ object GenerateAllPredictions {
   }
 
   def clean(): Unit ={
+    //close the log file object
     logWriter.close()
   }
 
