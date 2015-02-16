@@ -34,10 +34,10 @@ object GenerateCPUPredictions {
 
    //here we have choice of either using moving avg or not choosig moving avg
     if (extrapolationDuration.equals("yearly")) {
-        val labeledLogs = DataPreparationCPU.labeledPointRDDOfCPULogsMovingAverage(cpuLogs.filter(line => line.dateTime.
-         isAfter( DateTime.now.minusYears(1) )),25)
-//      val labeledLogs = DataPreparation.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
-//        isAfter(DateTime.now.minusYears(1))))
+//        val labeledLogs = DataPreparationCPU.labeledPointRDDOfCPULogsMovingAverage(cpuLogs.filter(line => line.dateTime.
+//         isAfter( DateTime.now.minusYears(1) )),25)
+      val labeledLogs = DataPreparationCPU.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
+        isAfter(DateTime.now.minusYears(1))))
 
       prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
     }
