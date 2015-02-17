@@ -16,17 +16,63 @@ object GenerateRAMPredictions {
 
     var prediction: IndexedSeq[Double] = null
 
+    /*
+    year prediction
+     */
     if (extrapolationDuration.equals("yearly")) {
-      val labeledLogs = DataPreparationRAM.labeledPointRDDOfRAMLogsMovingAverage(ramLog
-        .filter(line => line.dateTime.
-        isAfter( DateTime.now.minusYears(1) )),25)
-      //      val labeledLogs = DataPreparation.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
-      //        isAfter(DateTime.now.minusYears(1))))
+      //val labeledLogs = DataPreparationRAM.labeledPointRDDOfRAMLogsMovingAverage(ramLog
+      //  .filter(line => line.dateTime.
+       // isAfter( DateTime.now.minusYears(1) )),25)
+            val labeledLogs = DataPreparationRAM.labeledPointRDDOfRAMLogs(ramLog.filter(line => line.dateTime.
+              isAfter(DateTime.now.minusYears(1))))
 
       prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
     }
 
-    //similarly add for others also
+    /*
+    Month prediction
+     */
+    if(extrapolationDuration.equals("monthly"))
+    {
+      val labeledLogs = DataPreparationRAM.labeledPointRDDOfRAMLogs(ramLog.filter(line => line.dateTime.
+        isAfter(DateTime.now.minusMonths(1))))
+
+      prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
+    }
+
+    /*
+    Week prediction
+     */
+    if(extrapolationDuration.equals("weekly"))
+    {
+      val labeledLogs = DataPreparationRAM.labeledPointRDDOfRAMLogs(ramLog.filter(line => line.dateTime.
+        isAfter(DateTime.now.minusWeeks(1))))
+
+      prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
+    }
+
+    /*
+    Fortnight prediction
+     */
+    if(extrapolationDuration.equals("fortnightly"))
+    {
+      val labeledLogs = DataPreparationRAM.labeledPointRDDOfRAMLogs(ramLog.filter(line => line.dateTime.
+        isAfter(DateTime.now.minusWeeks(2))))
+
+      prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
+    }
+
+    /*
+    Day prediction
+     */
+    if(extrapolationDuration.equals("daily"))
+    {
+      val labeledLogs = DataPreparationRAM.labeledPointRDDOfRAMLogs(ramLog.filter(line => line.dateTime.
+        isAfter(DateTime.now.minusDays(1))))
+
+      prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
+    }
+
 
 
     prediction

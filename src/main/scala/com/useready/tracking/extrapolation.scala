@@ -10,6 +10,13 @@ import org.apache.spark.mllib.regression._
 import org.apache.spark.rdd.RDD
 
 object extrapolation {
+  /**
+   *
+   * @param logs
+   * @param sc
+   * @param extrapolationType
+   * @return
+   */
 
   def extrapolateLogs(logs: RDD[LabeledPoint], sc: SparkContext, extrapolationType: String) : IndexedSeq[Double] = {
 
