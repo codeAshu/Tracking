@@ -12,7 +12,7 @@ object MainClass {
     //This is only added for windows 8.1, its a bug in Spark and this workaround is find here
     //http://apache-spark-user-list.1001560.n3.nabble.com/rdd-saveAsTextFile-problem-td176.html
     System.setProperty("hadoop.home.dir", "winutil\\")  //comment out for linux
-    val sc = new SparkContext("local", "extrapolation")
+    val sc = new SparkContext("local", "extrapolatio")
 
     //cpuLogs
     val cpuLogs = sc.textFile("data/cpu.csv")

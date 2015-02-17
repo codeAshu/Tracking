@@ -172,7 +172,7 @@ object PerfmonLogs {
         println("error " + log) //DiskLog("w1","01/18/95-15:12:49",5000l,5000l,5000l)
         val fm = DateTimeFormat.forPattern("dd/MM/yy HH:mm:ss")
         val defaultTime =  fm.parseDateTime("01/01/15 19:09:47")
-        DiskLog("w1",defaultTime,5000l,5000l,5000l)
+        DiskLog("x",defaultTime,5000l,5000l,5000l)
 
 
     }
