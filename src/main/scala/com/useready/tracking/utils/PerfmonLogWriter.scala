@@ -19,10 +19,11 @@ object PerfmonLogWriter {
   val totalCPU = 100 //percentage
   val totalRAM = 117000000000.00 //bytes           //TODO:populate these values from msinfo32file and make available
   val totalDisk = 11450000000000.00 //bytes
-
+  val format = new java.text.SimpleDateFormat("dd-MM-yyyy")
   val fm = DateTimeFormat.forPattern("MM/dd/yyyy HH:mm:ss.SSS")
-  val path = "output/"                                          //global path for output
-
+  val cpuPath =  "output/CPU/"                                          //global path for output
+  val ramPath =  "output/RAM/"
+  val diskPath = "output/DISK/"
 
   /**
    * This function will create a RAM file as used available and total field,
@@ -35,7 +36,7 @@ object PerfmonLogWriter {
       .mkString(",")).collect()
 
     //this will create a file each time
-    val filename = (path+"RAMX")
+    val filename = (ramPath+"RAMX")
     val outFile = new File(filename)
     printToFile(outFile) { p =>
       logWritable.foreach(p.println)
@@ -69,7 +70,12 @@ object PerfmonLogWriter {
    * @param flag
    */
   def FileWriter(prediction: IndexedSeq[String], counter: String, flag: String) = {
-    val filename = path+counter+"-"+flag+"-"+System.currentTimeMillis().toString + ".txt"
+    var filename = ""
+    counter match {
+      case "CPU" =>  filename = cpuPath+counter+"-"+flag+"-"+format.format(new java.util.Date()) + ".csv"
+      case "DISK" => filename = diskPath+counter+"-"+flag+"-"+format.format(new java.util.Date()) + ".csv"
+      case "RAM" =>  filename = ramPath+counter+"-"+flag+"-"+format.format(new java.util.Date()) + ".csv"
+    }
     val outFile = new File(filename)
     printToFile(outFile) { p =>
       prediction.foreach(p.println)
