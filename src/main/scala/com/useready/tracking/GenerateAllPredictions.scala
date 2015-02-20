@@ -38,6 +38,8 @@ object GenerateAllPredictions {
       .filter(line => line.worker != "x")
       .cache()
 
+    PerfmonLogWriter.createCPUFile(cpuLogs)
+
     for (flag <- durationFlags) {
 
       val predictionPoint = GenerateCPUPredictions
@@ -64,6 +66,8 @@ object GenerateAllPredictions {
       val diskLogs = sc.textFile("data/DISK.csv").map(PerfmonLogs.parseDiskLogLine)
         .filter(line => line.worker!="x")
         .cache()
+
+      PerfmonLogWriter.createDiskFile(diskLogs)
 
       for (flag <- durationFlags) {
 

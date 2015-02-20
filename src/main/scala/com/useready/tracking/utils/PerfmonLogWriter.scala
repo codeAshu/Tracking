@@ -3,7 +3,7 @@ package com.useready.tracking.utils
 
 import java.io.{FileWriter, File}
 
-import com.useready.tracking.RAMLog
+import com.useready.tracking.{DiskLog, CPULog, RAMLog}
 import org.apache.spark.rdd.RDD
 import org.joda.time.{DateTimeZone, DateTime}
 import org.joda.time.format.DateTimeFormat
@@ -12,7 +12,6 @@ import org.joda.time.format.DateTimeFormat
  * Created by Ashu on 17-02-2015.
  */
 object PerfmonLogWriter {
-
 
 
 
@@ -25,6 +24,30 @@ object PerfmonLogWriter {
   val ramPath =  "output/RAM/"
   val diskPath = "output/DISK/"
 
+  def createDiskFile(diskLog: RDD[DiskLog]) = {
+    val logWritable = diskLog.map(line => Array(line.worker,line.dateTime.toString(fm),line.total,line.used,
+      line.available,line.flag)
+      .mkString(",")).collect()
+
+    val filename = (diskPath+"DISKX.csv")
+    val outFile = new File(filename)
+    printToFile(outFile) { p =>
+      logWritable.foreach(p.println)
+    }
+
+  }
+  def createCPUFile(cpuLog: RDD[CPULog]) = {
+    val logWritable = cpuLog.map(line => Array(line.worker,line.dateTime.toString(fm),line.total,line.used,
+      line.available,line.flag)
+      .mkString(",")).collect()
+
+    val filename = (cpuPath+"CPUX.csv")
+    val outFile = new File(filename)
+    printToFile(outFile) { p =>
+      logWritable.foreach(p.println)
+    }
+  }
+
   /**
    * This function will create a RAM file as used available and total field,
    * similar to disk, CPU files.
@@ -32,11 +55,12 @@ object PerfmonLogWriter {
    */
   def createRAMFile(ramLog: RDD[RAMLog]): Unit =  {
 
-    val logWritable = ramLog.map(line => Array(line.worker,line.dateTime,line.total,line.used,line.available)
+    val logWritable = ramLog.map(line => Array(line.worker,line.dateTime.toString(fm),line.total,line.used,
+      line.available,line.flag)
       .mkString(",")).collect()
 
     //this will create a file each time
-    val filename = (ramPath+"RAMX")
+    val filename = (ramPath+"RAMX.csv")
     val outFile = new File(filename)
     printToFile(outFile) { p =>
       logWritable.foreach(p.println)

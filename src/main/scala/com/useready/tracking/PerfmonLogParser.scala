@@ -44,6 +44,9 @@ case class RAMLog(worker: String, dateTime: DateTime,
 
 object PerfmonLogs {
 
+  val fm = DateTimeFormat.forPattern("MM/dd/yyyy HH:mm:ss.SSS")
+  val defaultTimeStr = "01/01/1915 19:09:47.598"
+
 def parseRAMProcessLog(line: RAMProcessLog) :RAMLog ={
   try {
     val used = line.dataserver +line.wgserver + line.vizqlserver + line.backgrounder +
@@ -55,8 +58,7 @@ def parseRAMProcessLog(line: RAMProcessLog) :RAMLog ={
   }
   catch {
     case e: Exception =>
-      val fm = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss.SSS")
-      val defaultTime =  fm.parseDateTime("01/01/1915 19:09:47.598")
+      val defaultTime =  fm.parseDateTime(defaultTimeStr)
       RAMLog("x",defaultTime,0.,0.,0.,"R")
   }
 }
@@ -79,7 +81,7 @@ def parseRAMProcessLog(line: RAMProcessLog) :RAMLog ={
 
     //unquote the string
     val logVecUnq = logVec.map(w => w.replaceAll("^\"|\"$", ""))
-    val fm = DateTimeFormat.forPattern("MM/dd/yyyy HH:mm:ss.SSS")
+
     try {
 
       val strDateTime = logVec(1)
@@ -94,8 +96,7 @@ def parseRAMProcessLog(line: RAMProcessLog) :RAMLog ={
     }catch {
       //filter these later worker "x" is erroneous log line
       case e: Exception =>
-        val fm = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss.SSS")
-        val defaultTime =  fm.parseDateTime("01/01/1915 19:09:47.598")
+        val defaultTime =  fm.parseDateTime(defaultTimeStr)
         RAMProcessLog("x",defaultTime,0,0,0,0,0,0,0,0,0)
 
     }
@@ -110,9 +111,7 @@ def parseRAMProcessLog(line: RAMProcessLog) :RAMLog ={
   def parseCPULogLine(log: String) : CPULog = {
 
     val logVec = log.split(",").toVector
-    val fm = DateTimeFormat.forPattern("MM/dd/yyyy HH:mm:ss.SSS")
     try {
-
       val strDateTime = logVec(1).replaceAll("^\"|\"$", "")
       val dateTime = fm.parseDateTime(strDateTime)
 
@@ -126,8 +125,7 @@ def parseRAMProcessLog(line: RAMProcessLog) :RAMLog ={
     }catch {
       //filter these later worker "x" is erroneous log line
       case e: Exception =>
-        val fm = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss.SSS")
-        val defaultTime =  fm.parseDateTime("01/01/1915 19:09:47.598")
+        val defaultTime =  fm.parseDateTime(defaultTimeStr)
         CPULog("x",defaultTime,0l,0l,0l,"R")
 
     }
@@ -140,8 +138,7 @@ def parseRAMProcessLog(line: RAMProcessLog) :RAMLog ={
    */
   def parseDiskLogLine(log: String): DiskLog = {
 
-    val fm = DateTimeFormat.forPattern("MM/dd/yy HH:mm:ss")
-    val defaultTime =  fm.parseDateTime("01/01/15 19:09:47")
+    //val defaultTime =  fm.parseDateTime("01/01/1915 19:09:47")
 
     val logVec = log.split(",").toVector
 
@@ -202,8 +199,7 @@ def parseRAMProcessLog(line: RAMProcessLog) :RAMLog ={
     }catch {
       case e: Exception =>
         println("error " + log) //DiskLog("w1","01/18/95-15:12:49",5000l,5000l,5000l)
-        val fm = DateTimeFormat.forPattern("dd/MM/yy HH:mm:ss")
-        val defaultTime =  fm.parseDateTime("01/01/15 19:09:47")
+        val defaultTime =  fm.parseDateTime(defaultTimeStr)
         DiskLog("x",defaultTime,5000l,5000l,5000l,"R")
 
 
