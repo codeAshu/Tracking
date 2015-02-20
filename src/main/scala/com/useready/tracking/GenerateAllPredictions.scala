@@ -1,42 +1,25 @@
 package com.useready.tracking
 
 import java.io.{File, PrintWriter}
+import org.joda.time.DateTime
+import utils._
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 
-/**
- * Created by abhilasha on 14-02-2015.
- */
 object GenerateAllPredictions {
 
-  var cpuLogs: RDD[CPULog] = null;
-  var diskLogs: RDD[DiskLog] = null
-  var ramLogs: RDD[RAMLog] = null;
   var logWriter = new PrintWriter("output/logfile.txt")
+  val durationFlags = List("Y","M","F","W","D")
 
-  def openLogFiles(sc: SparkContext): Unit =
-  {
-    /*
-    Open the CPU logs
-     */
-    cpuLogs = sc.textFile("data/cpu.csv")
-      .map(PerfmonLogs.parseCPULogLine)
-      .filter(line => line.worker!="x")
-      .cache()
-
-    /*
-    Open the Disk logs
-     */
-    diskLogs = sc.textFile("data/DISK.csv").map(PerfmonLogs.parseDiskLogLine)
-          .filter(line => line.worker!="x")
-          .cache()
-
-    /*
-    Open the RAM logs
-     */
-    ramLogs = sc.textFile("data/RAM.csv").map(PerfmonLogs.parseRAMLogLine)
-        .filter(line => line.worker!="x")
-        .cache()
+  /**
+   *
+   * @param f
+   * @param op
+   * @return
+   */
+  def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
+    val p = new java.io.PrintWriter(f)
+    try { op(p) } finally { p.close() }
   }
 
   /**
@@ -44,179 +27,96 @@ object GenerateAllPredictions {
    * @param sc
    * @return
    */
-  def generateAllCPUPredictions(sc: SparkContext): Unit ={
+  def generateAllCPUPredictions(sc: SparkContext,
+                                worker : String,
+                                interval :Int,
+                                 algo :String,
+                                 time :DateTime): Unit = {
 
-    //yearly prediction
-    var prediction = GenerateCPUPredictions.getPrediction(cpuLogs, sc, "linear","yearly")
-    val yearFile = new File("output/CPU-yearly-"+System.currentTimeMillis().toString+".txt")
-    var writer = new PrintWriter(yearFile)
-    writer.write(prediction.toString)
-    writer.close()
-    var thresholdCrossed  = CheckThreshold.cpuThresholdCrossed(prediction)
-    println("Threshold crossed for CPU with yearly data?: "+thresholdCrossed)
-    logWriter.write("Threshold crossed for CPU with yearly data?: "+thresholdCrossed+"\n")
+    val cpuLogs = sc.textFile("data/CPU.csv")
+      .map(PerfmonLogs.parseCPULogLine)
+      .filter(line => line.worker != "x")
+      .cache()
 
-    //monthly prediction
-    prediction = GenerateCPUPredictions.getPrediction(cpuLogs, sc, "linear","monthly")
-    val monthFile = new File("output/CPU-monthly-"+System.currentTimeMillis().toString+".txt")
-    writer = new PrintWriter(monthFile)
-    writer.write(prediction.toString)
-    writer.close()
-    thresholdCrossed  = CheckThreshold.cpuThresholdCrossed(prediction)
-    println("Threshold crossed for CPU with monthly data?: "+thresholdCrossed)
-    logWriter.write("Threshold crossed for CPU with monthly data?: "+thresholdCrossed+"\n")
+    for (flag <- durationFlags) {
 
-    //weekly prediction
-    prediction = GenerateCPUPredictions.getPrediction(cpuLogs, sc, "linear","weekly")
-    val weekFile = new File("output/CPU-weekly-"+System.currentTimeMillis().toString+".txt")
-    writer = new PrintWriter(weekFile)
-    writer.write(prediction.toString)
-    writer.close()
-    thresholdCrossed  = CheckThreshold.cpuThresholdCrossed(prediction)
-    println("Threshold crossed for CPU with weekly data?: "+thresholdCrossed)
-    logWriter.write("Threshold crossed for CPU with weekly data?: "+thresholdCrossed+"\n")
+      val predictionPoint = GenerateCPUPredictions
+        .getPrediction(cpuLogs, sc, algo, flag,time)
 
-    //fortnightly prediction
-    prediction = GenerateCPUPredictions.getPrediction(cpuLogs, sc, "linear","fortnightly")
-    val fortnightFile = new File("output/CPU-fortnightly-"+System.currentTimeMillis().toString+".txt")
-    writer = new PrintWriter(fortnightFile)
-    writer.write(prediction.toString)
-    writer.close()
-    thresholdCrossed  = CheckThreshold.cpuThresholdCrossed(prediction)
-    println("Threshold crossed for CPU with fortnightly data?: "+thresholdCrossed)
-    logWriter.write("Threshold crossed for CPU with fortnightly data?: "+thresholdCrossed+"\n")
+      if(predictionPoint != null) {
+        val prediction = predictionPoint.map(used => PerfmonLogWriter
+          .cpuLogWriter(used, worker, interval, flag, time))
 
-    //daily prediction
-    prediction = GenerateCPUPredictions.getPrediction(cpuLogs, sc, "linear","daily")
-    val dayFile = new File("output/CPU-daily-"+System.currentTimeMillis().toString+".txt")
-    writer = new PrintWriter(dayFile)
-    writer.write(prediction.toString)
-    writer.close()
-    thresholdCrossed  = CheckThreshold.cpuThresholdCrossed(prediction)
-    println("Threshold crossed for CPU with daily data?: "+thresholdCrossed)
-    logWriter.write("Threshold crossed for CPU with daily data?: "+thresholdCrossed+"\n")
+        PerfmonLogWriter.FileWriter(prediction, "CPU", flag)
 
-
+        val thresholdCrossed = CheckThreshold.thresholdCrossed(predictionPoint, "CPU")
+        println("Threshold crossed for CPU with "+flag+" data?: " + thresholdCrossed)
+        logWriter.write("Threshold crossed for CPU with "+flag+" data?: " + thresholdCrossed + "\n")
+      }
+    }
   }
+    def generateAllDiskPredictions(sc: SparkContext,
+                                  worker : String,
+                                  interval :Int,
+                                  algo :String,
+                                  time :DateTime): Unit = {
 
-  /**
-   * generate Disk logs by day, week, fortnight, month, year
-   * @param sc
-   * @return
-   */
-  def generateAllDiskPredictions(sc: SparkContext): Unit ={
+      val diskLogs = sc.textFile("data/DISK.csv").map(PerfmonLogs.parseDiskLogLine)
+        .filter(line => line.worker!="x")
+        .cache()
 
-    //yearly prediction
-    var prediction = GenerateDiskPredictions.getPrediction(diskLogs, sc, "linear","yearly")
-    val yearFile = new File("output/Disk-yearly-"+System.currentTimeMillis().toString+".txt")
-    var writer = new PrintWriter(yearFile)
-    writer.write(prediction.toString)
-    writer.close()
-    var thresholdCrossed  = CheckThreshold.diskThresholdCrossed(prediction)
-    println("Threshold crossed for Disk with yearly data?: "+thresholdCrossed)
-    logWriter.write("Threshold crossed for Disk with yearly data?: "+thresholdCrossed+"\n")
+      for (flag <- durationFlags) {
 
-    //monthly prediction
-    prediction = GenerateDiskPredictions.getPrediction(diskLogs, sc, "linear","monthly")
-    val monthFile = new File("output/Disk-monthly-"+System.currentTimeMillis().toString+".txt")
-    writer = new PrintWriter(monthFile)
-    writer.write(prediction.toString)
-    writer.close()
-    thresholdCrossed  = CheckThreshold.diskThresholdCrossed(prediction)
-    println("Threshold crossed for Disk with monthly data?: "+thresholdCrossed)
-    logWriter.write("Threshold crossed for Disk with monthly data?: "+thresholdCrossed+"\n")
+        val predictionPoint = GenerateDiskPredictions
+          .getPrediction(diskLogs, sc, algo, flag, time)
 
-    //weekly prediction
-    prediction = GenerateDiskPredictions.getPrediction(diskLogs, sc, "linear","weekly")
-    val weekFile = new File("output/Disk-weekly-"+System.currentTimeMillis().toString+".txt")
-    writer = new PrintWriter(weekFile)
-    writer.write(prediction.toString)
-    writer.close()
-    thresholdCrossed  = CheckThreshold.diskThresholdCrossed(prediction)
-    println("Threshold crossed for Disk with weekly data?: "+thresholdCrossed)
-    logWriter.write("Threshold crossed for Disk with weekly data?: "+thresholdCrossed+"\n")
+        if(predictionPoint != null) {
+          val prediction = predictionPoint.map(used => PerfmonLogWriter
+            .diskLogWriter(used, worker, interval, flag, time))
 
-    //fortnightly prediction
-    prediction = GenerateDiskPredictions.getPrediction(diskLogs, sc, "linear","fortnightly")
-    val fortnightFile = new File("output/Disk-fortnightly-"+System.currentTimeMillis().toString+".txt")
-    writer = new PrintWriter(fortnightFile)
-    writer.write(prediction.toString)
-    writer.close()
-    thresholdCrossed  = CheckThreshold.diskThresholdCrossed(prediction)
-    println("Threshold crossed for Disk with fortnightly data?: "+thresholdCrossed)
-    logWriter.write("Threshold crossed for Disk with fortnightly data?: "+thresholdCrossed+"\n")
+          PerfmonLogWriter.FileWriter(prediction, "DISK", flag)
 
-    //daily prediction
-    prediction = GenerateDiskPredictions.getPrediction(diskLogs, sc, "linear","daily")
-    val dayFile = new File("output/Disk-daily-"+System.currentTimeMillis().toString+".txt")
-    writer = new PrintWriter(dayFile)
-    writer.write(prediction.toString)
-    writer.close()
-    thresholdCrossed  = CheckThreshold.diskThresholdCrossed(prediction)
-    println("Threshold crossed for Disk with daily data?: "+thresholdCrossed)
-    logWriter.write("Threshold crossed for Disk with daily data?: "+thresholdCrossed+"\n")
+          val thresholdCrossed = CheckThreshold.thresholdCrossed(predictionPoint, "DISK")
+          println("Threshold crossed for DISK with "+flag+" data?: " + thresholdCrossed)
+          logWriter.write("Threshold crossed for DISK with " +flag+" data?: " + thresholdCrossed + "\n")
+        }
+      }
+    }
 
+  def generateAllRAMPredictions(sc: SparkContext,
+                                 worker : String,
+                                 interval :Int,
+                                 algo :String,
+                                 time :DateTime): Unit = {
+
+    //coverted to class RAMLog
+    val ramLogs = sc.textFile("data/RAM.csv")
+      .map(PerfmonLogs.parseRAMLogLine)
+      .map(PerfmonLogs.parseRAMProcessLog)
+      .filter(line => line.worker != "x")
+      .cache()
+
+    //save a structure of RAM data as [Worker, DateTime, Total, Used, Available, Flag]
+    PerfmonLogWriter.createRAMFile(ramLogs)
+
+    for (flag <- durationFlags) {
+
+      val predictionPoint = GenerateRAMPredictions
+        .getPrediction(ramLogs, sc, algo, flag, time)
+
+      if(predictionPoint != null) {
+        val prediction = predictionPoint.map(used => PerfmonLogWriter
+          .ramLogWriter(used, worker, interval, flag, time))
+
+        PerfmonLogWriter.FileWriter(prediction, "RAM", flag)
+
+        val thresholdCrossed = CheckThreshold.thresholdCrossed(predictionPoint, "RAM")
+        println("Threshold crossed for RAM with " +flag+" data?: " + thresholdCrossed)
+        logWriter.write("Threshold crossed for RAM with " +flag+" data?: " + thresholdCrossed + "\n")
+      }
+    }
   }
-
-  /**
-   * generate RAM logs by day, week, fortnight, month, year
-   * @param sc
-   * @return
-   */
-  def generateAllRAMPredictions(sc: SparkContext): Unit ={
-
-    //yearly prediction
-    var prediction = GenerateRAMPredictions.getPrediction(ramLogs, sc, "linear","yearly")
-    val yearFile = new File("output/RAM-yearly-"+System.currentTimeMillis().toString+".txt")
-    var writer = new PrintWriter(yearFile)
-    writer.write(prediction.toString)
-    writer.close()
-    var thresholdCrossed  = CheckThreshold.ramThresholdCrossed(prediction)
-    println("Threshold crossed for RAM with yearly data?: "+thresholdCrossed)
-    logWriter.write("Threshold crossed for RAM with yearly data?: "+thresholdCrossed+"\n")
-
-    //monthly prediction
-    prediction = GenerateRAMPredictions.getPrediction(ramLogs, sc, "linear","monthly")
-    val monthFile = new File("output/RAM-monthly-"+System.currentTimeMillis().toString+".txt")
-    writer = new PrintWriter(monthFile)
-    writer.write(prediction.toString)
-    writer.close()
-    thresholdCrossed  = CheckThreshold.ramThresholdCrossed(prediction)
-    println("Threshold crossed for RAM with monthly data?: "+thresholdCrossed)
-    logWriter.write("Threshold crossed for RAM with monthly data?: "+thresholdCrossed+"\n")
-
-    //weekly prediction
-    prediction = GenerateRAMPredictions.getPrediction(ramLogs, sc, "linear","weekly")
-    val weekFile = new File("output/RAM-weekly-"+System.currentTimeMillis().toString+".txt")
-    writer = new PrintWriter(weekFile)
-    writer.write(prediction.toString)
-    writer.close()
-    thresholdCrossed  = CheckThreshold.ramThresholdCrossed(prediction)
-    println("Threshold crossed for RAM with weekly data?: "+thresholdCrossed)
-    logWriter.write("Threshold crossed for RAM with weekly data?: "+thresholdCrossed+"\n")
-
-    //fortnightly prediction
-    prediction = GenerateRAMPredictions.getPrediction(ramLogs, sc, "linear","fortnightly")
-    val fortnightFile = new File("output/RAM-fortnightly-"+System.currentTimeMillis().toString+".txt")
-    writer = new PrintWriter(fortnightFile)
-    writer.write(prediction.toString)
-    writer.close()
-    thresholdCrossed  = CheckThreshold.ramThresholdCrossed(prediction)
-    println("Threshold crossed for RAM with fortnightly data?: "+thresholdCrossed)
-    logWriter.write("Threshold crossed for RAM with fortnightly data?: "+thresholdCrossed+"\n")
-
-    //daily prediction
-    prediction = GenerateRAMPredictions.getPrediction(ramLogs, sc, "linear","daily")
-    val dayFile = new File("output/RAM-daily-"+System.currentTimeMillis().toString+".txt")
-    writer = new PrintWriter(dayFile)
-    writer.write(prediction.toString)
-    writer.close()
-    thresholdCrossed  = CheckThreshold.ramThresholdCrossed(prediction)
-    println("Threshold crossed for RAM with daily data?: "+thresholdCrossed)
-    logWriter.write("Threshold crossed for RAM with daily data?: "+thresholdCrossed+"\n")
-  }
-
-  def clean(): Unit ={
+    def clean(): Unit ={
     //close the log file object
     logWriter.close()
   }

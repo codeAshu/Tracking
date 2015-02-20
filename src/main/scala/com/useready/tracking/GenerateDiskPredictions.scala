@@ -9,78 +9,63 @@ import org.joda.time.DateTime
  */
 object GenerateDiskPredictions {
 
-  def getPrediction(diskLogs: RDD[DiskLog], sc: SparkContext, extrapolationType: String, extrapolationDuration: String)
-  : IndexedSeq[Double] = {
+  def getPrediction(diskLogs: RDD[DiskLog],
+                    sc: SparkContext,
+                    extrapolationType: String,
+                    extrapolationDuration: String,
+                    time : DateTime)
+  : IndexedSeq[(Double,Double)] = {
 
     //    val window = 10
 
-    var prediction: IndexedSeq[Double] = null
-    /*
-    TODO :So based on the extrapolation window, decide the value of window
-    to smooth the analysis
-    day:window :
-    fortnight :50
-    month :100
-    year :500
-     */
+    var prediction: IndexedSeq[(Double,Double)] = null
 
-    /*
-        Year prediction
-         */
-    if (extrapolationDuration.equals("yearly")) {
-      val labeledLogs = DataPreparationDisk.labeledPointRDDOfDiskLogsMovingAverage(diskLogs.filter(line => line.dateTime.
-        isAfter( DateTime.now.minusYears(1) )),25)
+   //Year prediction
+    if (extrapolationDuration.equals("Y")) {
+      val labeledLogs = DataPreparationDisk.labeledPointRDDOfDiskLogsMovingAverage(diskLogs.
+        filter(line => line.dateTime.
+        isAfter( time.minusYears(1) )),25)
       //      val labeledLogs = DataPreparation.labeledPointRDDOfCPULogs(cpuLogs.filter(line => line.dateTime.
       //        isAfter(DateTime.now.minusYears(1))))
-
-      prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
+      if(labeledLogs.count() != 0)
+        prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
     }
 
-    /*
-    Month prediction
-     */
-    if(extrapolationDuration.equals("monthly"))
+  //Month prediction
+    if(extrapolationDuration.equals("M"))
     {
       val labeledLogs = DataPreparationDisk.labeledPointRDDOfDiskLogs(diskLogs.filter(line => line.dateTime.
-        isAfter(DateTime.now.minusMonths(1))))
-
-      prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
+        isAfter(time.minusMonths(1))))
+      if(labeledLogs.count() != 0)
+        prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
     }
 
-    /*
-    Week prediction
-     */
-    if(extrapolationDuration.equals("weekly"))
+    // Week prediction
+    if(extrapolationDuration.equals("W"))
     {
       val labeledLogs = DataPreparationDisk.labeledPointRDDOfDiskLogs(diskLogs.filter(line => line.dateTime.
-        isAfter(DateTime.now.minusWeeks(1))))
-
-      prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
+        isAfter(time.minusWeeks(1))))
+      if(labeledLogs.count() != 0)
+        prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
     }
 
-    /*
-    Fortnight prediction
-     */
-    if(extrapolationDuration.equals("fortnightly"))
+    //Fortnight prediction
+    if(extrapolationDuration.equals("F"))
     {
       val labeledLogs = DataPreparationDisk.labeledPointRDDOfDiskLogs(diskLogs.filter(line => line.dateTime.
-        isAfter(DateTime.now.minusWeeks(2))))
-
-      prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
+        isAfter(time.minusWeeks(2))))
+      if(labeledLogs.count() != 0)
+        prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
     }
 
-    /*
-    Day prediction
-     */
-    if(extrapolationDuration.equals("daily"))
+   //Day prediction
+    if(extrapolationDuration.equals("D"))
     {
       val labeledLogs = DataPreparationDisk.labeledPointRDDOfDiskLogs(diskLogs.filter(line => line.dateTime.
-        isAfter(DateTime.now.minusDays(1))))
-
-      prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
+        isAfter(time.minusDays(1))))
+      if(labeledLogs.count() != 0)
+        prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
     }
-
-
     prediction
   }
 

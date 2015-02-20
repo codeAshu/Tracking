@@ -19,7 +19,8 @@ object DataPreparationRAM {
     }).map(line=> line._2)
 
     //smoothed out rdd by moving average with window
-    val used =  logs.map(line => line.total).mapPartitions(p => {
+    val used =  logs.map(line => line.used)
+      .mapPartitions(p => {
       val sorted = p.toSeq.sorted
       val olds = sorted.iterator
       val news = sorted.iterator
@@ -49,7 +50,7 @@ object DataPreparationRAM {
     */
   def labeledPointRDDOfRAMLogs(ramLogs: RDD[RAMLog]) : RDD[LabeledPoint] ={
 
-    val labeledLogs =  ramLogs.map(line => line.total)
+    val labeledLogs =  ramLogs.map(line => line.used)
       .zipWithIndex()
       .map{ line =>
       val vec = Vectors.dense(line._2.toDouble)
