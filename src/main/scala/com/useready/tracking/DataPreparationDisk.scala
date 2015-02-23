@@ -29,12 +29,12 @@ new RDD of labeled points on which extrapolation can be done
       val olds = sorted.iterator
       val news = sorted.iterator
       var sum = news.take(window - 1).sum
-      (olds zip news).map({ case (o, n) => {
+      (olds zip news).map({ case (o, n) =>
         sum += n
         val v = sum
         sum -= o
         v/window
-      }})
+      })
     })
 
     /**
@@ -48,7 +48,7 @@ new RDD of labeled points on which extrapolation can be done
       LabeledPoint(line._1, vec)
     }.cache()
 
-    return labeledLogs
+    labeledLogs
   }
 
   /*
@@ -63,7 +63,7 @@ new RDD of labeled points on which extrapolation can be done
       val vec = Vectors.dense(line._2.toLong)
       LabeledPoint(line._1, vec)
     }
-    return labeledLogs
+    labeledLogs
   }
   
 }

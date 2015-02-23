@@ -4,20 +4,27 @@ package com.useready.tracking
  * Created by abhilasha on 09-02-2015.
  */
 object CheckThreshold {
+  /**
+   *
+   * @param predictData
+   * @param counter
+   * @return
+   */
+  def thresholdCrossed(predictData: IndexedSeq[(Double, Double)], counter: String): Boolean = {
 
-  final val CPUThreshold = 80 //percentage
-  final val RAMThreshold = 7000000000.00 //bytes
-  final val DiskThreshold = 450000000000.00 //bytes
+    val  predictedValues = predictData.map(w=>w._2)
 
-  def cpuThresholdCrossed(predictedValues: IndexedSeq[Double]) : Boolean = {
-    predictedValues.max > CPUThreshold
-  }
+    val CPUThreshold = 80 //percentage
+    val RAMThreshold = 7000000000.00 //bytes
+    val DiskThreshold = 450000000000.00 //bytes
 
-  def ramThresholdCrossed(predictedValues: IndexedSeq[Double]) : Boolean = {
-    predictedValues.max > RAMThreshold
-  }
+    counter match {
+      case "CPU" =>  predictedValues.max > CPUThreshold
+      case "DISK" => predictedValues.max > DiskThreshold
+      case "RAM" => predictedValues.max > RAMThreshold
 
-  def diskThresholdCrossed(predictedValues: IndexedSeq[Double]) : Boolean = {
-    predictedValues.max > DiskThreshold
+    }
+
   }
 }
+

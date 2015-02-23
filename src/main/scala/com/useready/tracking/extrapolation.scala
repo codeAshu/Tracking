@@ -18,7 +18,9 @@ object extrapolation {
    * @return
    */
 
-  def extrapolateLogs(logs: RDD[LabeledPoint], sc: SparkContext, extrapolationType: String) : IndexedSeq[Double] = {
+  def extrapolateLogs(logs: RDD[LabeledPoint],
+                      sc: SparkContext,
+                      extrapolationType: String) : IndexedSeq[(Double,Double)] = {
 
     //count of logs
     val nLogs = logs.count()
@@ -46,7 +48,7 @@ object extrapolation {
 
     val prediction =  testData.map { point =>
       val prediction =  model.predict(Vectors.dense(point))
-      prediction
+      (point, prediction)
     }
 
     prediction
