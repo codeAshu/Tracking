@@ -14,17 +14,21 @@ flag meaning:
   F - fortnight prediction
   Y - yearly prediction
  */
-case class DiskLog(worker: String, dateTime: DateTime,
-                   total: Long, used: Long, available: Long, flag: String ) {
 
-}
+case class Log(worker: String, dateTime: DateTime,
+                           total: Double, used: Double, available: Double, flag: String )
+
+class DiskLog(worker: String, dateTime: DateTime,
+              total: Double, used: Double, available: Double,
+              flag: String ) extends Log(worker: String, dateTime: DateTime,
+  total: Double, used: Double, available: Double, flag: String )
 /**
 Class for CPU performance logs
  */
-case class CPULog(worker: String, dateTime: DateTime,
-                  total: Double , used: Double, available: Double, flag: String ) {
-
-}
+class CPULog(worker: String, dateTime: DateTime,
+             total: Double, used: Double, available:Double,
+             flag: String ) extends Log(worker: String, dateTime: DateTime,
+  total: Double, used: Double, available: Double, flag: String )
 
 
 /**
@@ -36,10 +40,10 @@ case class RAMProcessLog(worker: String, dateTime: DateTime,
                    postgres : Double, deserver64: Double, otherProcess:Double ) {
 }
 
-case class RAMLog(worker: String, dateTime: DateTime,
-                  total: Double , used : Double, available : Double,flag: String){
-
-}
+class RAMLog(worker: String, dateTime: DateTime,
+             total: Double, used: Double, available: Double,
+             flag: String ) extends Log(worker: String, dateTime: DateTime,
+  total: Double, used: Double, available: Double, flag: String )
 
 
 object PerfmonLogs {
@@ -54,12 +58,12 @@ def parseRAMProcessLog(line: RAMProcessLog) :RAMLog ={
 
     val available = line.total - used
 
-    RAMLog(line.worker, line.dateTime, line.total, used, available, "R")
+   new RAMLog(line.worker, line.dateTime, line.total, used, available, "R")
   }
   catch {
     case e: Exception =>
       val defaultTime =  fm.parseDateTime(defaultTimeStr)
-      RAMLog("x",defaultTime,0.,0.,0.,"R")
+     new RAMLog("x",defaultTime,0.,0.,0.,"R")
   }
 }
 
@@ -75,29 +79,26 @@ def parseRAMProcessLog(line: RAMProcessLog) :RAMLog ={
    * @return  RAMLog class object
    */
 
-  def parseRAMLogLine(log: String) : RAMProcessLog = {
-    val logVec = log.split(",").toVector
-    val worker = logVec(0)
-
-    //unquote the string
-    val logVecUnq = logVec.map(w => w.replaceAll("^\"|\"$", ""))
+  def parseRAMLogLine(log: String) : RAMLog = {
 
     try {
-
+      val logVec = log.split(",").toVector
+      val worker = logVec(0)
+      //unquote the string
+      val logVecUnq = logVec.map(w => w.replaceAll("^\"|\"$", ""))
       val strDateTime = logVec(1)
       val dateTime = fm.parseDateTime(strDateTime)
 
       //unquote the string
-       RAMProcessLog(worker, dateTime, logVecUnq(2).toDouble,logVecUnq(3).toDouble,
+      parseRAMProcessLog( RAMProcessLog(worker, dateTime, logVecUnq(2).toDouble,logVecUnq(3).toDouble,
          logVecUnq(4).toDouble,logVecUnq(5).toDouble, logVecUnq(6).toDouble,
          logVecUnq(7).toDouble,logVecUnq(8).toDouble,logVecUnq(9).toDouble,
-         logVecUnq(10).toDouble)
-
+         logVecUnq(10).toDouble))
     }catch {
       //filter these later worker "x" is erroneous log line
       case e: Exception =>
         val defaultTime =  fm.parseDateTime(defaultTimeStr)
-        RAMProcessLog("x",defaultTime,0,0,0,0,0,0,0,0,0)
+        parseRAMProcessLog(RAMProcessLog("x",defaultTime,0,0,0,0,0,0,0,0,0))
 
     }
   }
@@ -109,9 +110,8 @@ def parseRAMProcessLog(line: RAMProcessLog) :RAMLog ={
    * @return CPULog class object
    */
   def parseCPULogLine(log: String) : CPULog = {
-
-    val logVec = log.split(",").toVector
     try {
+      val logVec = log.split(",").toVector
       val strDateTime = logVec(1).replaceAll("^\"|\"$", "")
       val dateTime = fm.parseDateTime(strDateTime)
 
@@ -120,13 +120,13 @@ def parseRAMProcessLog(line: RAMProcessLog) :RAMLog ={
       val avail = 100.0 - used.toDouble
 
       //return the class object
-      CPULog(logVec(0), dateTime, 100.0, used.toDouble, avail, "R")
+     new CPULog(logVec(0), dateTime, 100.0, used.toDouble, avail, "R")
 
     }catch {
       //filter these later worker "x" is erroneous log line
       case e: Exception =>
         val defaultTime =  fm.parseDateTime(defaultTimeStr)
-        CPULog("x",defaultTime,0l,0l,0l,"R")
+       new CPULog("x",defaultTime,0l,0l,0l,"R")
 
     }
   }
@@ -138,20 +138,11 @@ def parseRAMProcessLog(line: RAMProcessLog) :RAMLog ={
    */
   def parseDiskLogLine(log: String): DiskLog = {
 
-    //val defaultTime =  fm.parseDateTime("01/01/1915 19:09:47")
-
-    val logVec = log.split(",").toVector
-
-    println(logVec)
     try{
-
+      val logVec = log.split(",").toVector
       var strDateTime = logVec(1).replaceAll("^\"|\"$", "")
       strDateTime = strDateTime.replaceAll("-"," ")
-
       val dateTime = fm.parseDateTime(strDateTime)
-
-
-
       //unquote the string
       var total:String = logVec(2).trim().replaceAll("^\"|\"$", "")
 
@@ -166,7 +157,6 @@ def parseRAMProcessLog(line: RAMProcessLog) :RAMLog ={
       total = total + logVec(i).trim().replaceAll("^\"|\"$", "")
       println(total+" total")
       i = i+1
-
 
       var used = logVec(i).trim().replaceAll("^\"|\"$", "")
       i = i+1
@@ -194,13 +184,13 @@ def parseRAMProcessLog(line: RAMProcessLog) :RAMLog ={
       println(avail+" avail")
 
       //return the class object
-      DiskLog(logVec(0), dateTime, total.toLong, used.toLong, avail.toLong,"R")
+     new DiskLog(logVec(0), dateTime, total.toDouble, used.toDouble, avail.toDouble,"R")
 
     }catch {
       case e: Exception =>
         println("error " + log) //DiskLog("w1","01/18/95-15:12:49",5000l,5000l,5000l)
         val defaultTime =  fm.parseDateTime(defaultTimeStr)
-        DiskLog("x",defaultTime,5000l,5000l,5000l,"R")
+       new DiskLog("x",defaultTime,5000l,5000l,5000l,"R")
 
 
     }

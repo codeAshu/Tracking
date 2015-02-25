@@ -9,6 +9,7 @@ trait LocalSparkContext extends BeforeAndAfterAll { self: Suite =>
   @transient var sc: SparkContext = _
 
   override def beforeAll() {
+    System.setProperty("hadoop.home.dir", "G:\\GitRepos\\Tracking\\winutil\\")  //comment out for linux
     val conf = new SparkConf()
       .setMaster("local")
       .setAppName("test")

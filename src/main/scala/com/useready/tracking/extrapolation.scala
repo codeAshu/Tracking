@@ -1,6 +1,3 @@
-/**
- * Created by Ashu on 22-01-2015.
- */
 package com.useready.tracking
 
 import org.apache.spark.SparkContext
@@ -31,19 +28,14 @@ object extrapolation {
     //call the function to extrapolate
     var model: GeneralizedLinearModel = null
 
-    if(extrapolationType.equals("linear")) {
-      model = extrapolation.extrapolateLinear(logs, sc)
-    }
-
-    if(extrapolationType.equals("ridge")) {
+    if(extrapolationType.equals("ridge"))
       model = extrapolation.extrapolateRidge(logs, sc)
-    }
 
-    if(extrapolationType.equals("lasso")) {
+    else if(extrapolationType.equals("lasso"))
       model = extrapolation.extrapolateLasso(logs, sc)
-    }
 
-    //    val model = extrapolate(logs, sc)
+    else model = extrapolation.extrapolateLinear(logs, sc)
+
     println("regression model: " +model)
 
     val prediction =  testData.map { point =>
