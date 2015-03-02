@@ -14,15 +14,11 @@ object CheckThreshold {
 
     val  predictedValues = predictData.map(w=>w._2)
 
-    val CPUThreshold = 80 //percentage
-    val RAMThreshold = 7000000000.00 //bytes
-    val DiskThreshold = 450000000000.00 //bytes
-
     counter match {
-      case "CPU" =>  predictedValues.max > CPUThreshold
-      case "DISK" => predictedValues.max > DiskThreshold
-      case "RAM" => predictedValues.max > RAMThreshold
-
+      case "CPU" =>  predictedValues.max > CPU.threshold
+      case "DISK" => predictedValues.max > DISK.threshold
+      case "RAM" => predictedValues.max > RAM.threshold
+      case _ =>false
     }
 
   }

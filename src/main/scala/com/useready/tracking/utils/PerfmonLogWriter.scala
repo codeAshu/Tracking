@@ -3,7 +3,7 @@ package com.useready.tracking.utils
 
 import java.io.{FileWriter, File}
 
-import com.useready.tracking.{DiskLog, CPULog, RAMLog}
+import com.useready.tracking.{Log, DiskLog, CPULog, RAMLog}
 import org.apache.spark.rdd.RDD
 import org.joda.time.{DateTimeZone, DateTime}
 import org.joda.time.format.DateTimeFormat
@@ -24,7 +24,7 @@ object PerfmonLogWriter {
   val ramPath =  "output/RAM/"
   val diskPath = "output/DISK/"
 
-  def createDiskFile(diskLog: RDD[DiskLog]) = {
+  def createDiskFile(diskLog: RDD[Log]) = {
     val logWritable = diskLog.map(line => Array(line.worker,line.dateTime.toString(fm),line.total,line.used,
       line.available,line.flag)
       .mkString(",")).collect()
@@ -36,7 +36,7 @@ object PerfmonLogWriter {
     }
 
   }
-  def createCPUFile(cpuLog: RDD[CPULog]) = {
+  def createCPUFile(cpuLog: RDD[Log]):Unit = {
     val logWritable = cpuLog.map(line => Array(line.worker,line.dateTime.toString(fm),line.total,line.used,
       line.available,line.flag)
       .mkString(",")).collect()
@@ -53,7 +53,7 @@ object PerfmonLogWriter {
    * similar to disk, CPU files.
    * @param ramLog
    */
-  def createRAMFile(ramLog: RDD[RAMLog]): Unit =  {
+  def createRAMFile(ramLog: RDD[Log]): Unit =  {
 
     val logWritable = ramLog.map(line => Array(line.worker,line.dateTime.toString(fm),line.total,line.used,
       line.available,line.flag)
