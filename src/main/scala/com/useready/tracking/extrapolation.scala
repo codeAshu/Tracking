@@ -3,8 +3,11 @@ package com.useready.tracking
 import org.apache.spark.SparkContext
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.optimization.SimpleUpdater
+import org.apache.spark.mllib.optimization.L1Updater
+import org.apache.spark.mllib.optimization.SquaredL2Updater
 import org.apache.spark.mllib.regression._
 import org.apache.spark.rdd.RDD
+
 
 object extrapolation {
   /**
@@ -55,10 +58,9 @@ object extrapolation {
   def extrapolateLinear(parsedData: RDD[LabeledPoint], sc:SparkContext): LinearRegressionModel = {
 
     val algorithm = new LinearRegressionWithSGD()
-    algorithm.optimizer.setStepSize(0.0001)
+    algorithm.optimizer.setStepSize(0.01)
     algorithm.optimizer.setNumIterations(100)
     algorithm.optimizer.setUpdater(new SimpleUpdater())
-    algorithm.optimizer.setRegParam(0.01)
 
     val model = algorithm.run(parsedData)
 
@@ -86,10 +88,10 @@ object extrapolation {
   def extrapolateRidge(parsedData: RDD[LabeledPoint], sc:SparkContext): RidgeRegressionModel = {
 
     val algorithm = new RidgeRegressionWithSGD()
-    algorithm.optimizer.setStepSize(0.0001)
+    algorithm.optimizer.setStepSize(0.01)
     algorithm.optimizer.setNumIterations(100)
-    algorithm.optimizer.setUpdater(new SimpleUpdater())
-    algorithm.optimizer.setRegParam(0.01)
+    algorithm.optimizer.setUpdater(new SquaredL2Updater())
+    algorithm.optimizer.setRegParam(1.0)
 
     val model = algorithm.run(parsedData)
 
@@ -118,10 +120,10 @@ object extrapolation {
   def extrapolateLasso(parsedData: RDD[LabeledPoint], sc:SparkContext): LassoModel = {
 
     val algorithm = new LassoWithSGD()
-    algorithm.optimizer.setStepSize(0.0001)
+    algorithm.optimizer.setStepSize(0.01)
     algorithm.optimizer.setNumIterations(100)
-    algorithm.optimizer.setUpdater(new SimpleUpdater())
-    algorithm.optimizer.setRegParam(0.01)
+    algorithm.optimizer.setUpdater(new L1Updater())
+    algorithm.optimizer.setRegParam(0.1)
 
     val model = algorithm.run(parsedData)
 

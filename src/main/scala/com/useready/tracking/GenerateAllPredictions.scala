@@ -9,7 +9,7 @@ import org.apache.spark.rdd.RDD
 object GenerateAllPredictions {
 
   var thresholdWriter = new PrintWriter("output/logfile.txt")
-  val durationFlags = List("Y","M","F","W","D")
+  val durationFlags = List("Y","Q","M","F","W","D")
 
   /**
    *

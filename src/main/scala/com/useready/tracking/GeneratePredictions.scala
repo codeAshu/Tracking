@@ -41,10 +41,21 @@ object GeneratePredictions {
         prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
     }
 
+   /*
+  Quarter prediction
+   */
+    else if(extrapolationDuration.equals("Q"))
+    {
+      val labeledLogs = DataPreparation.labeledPointRDD(Logs.filter(line => line.dateTime.
+        isAfter(time.minusMonths(3))))
+
+      if(labeledLogs.count() != 0)
+        prediction = extrapolation.extrapolateLogs(labeledLogs, sc, extrapolationType)
+    }
     /*
     Month prediction
      */
-    if(extrapolationDuration.equals("M"))
+    else if(extrapolationDuration.equals("M"))
     {
       val labeledLogs = DataPreparation.labeledPointRDD(Logs.filter(line => line.dateTime.
         isAfter(time.minusMonths(1))))
@@ -56,7 +67,7 @@ object GeneratePredictions {
     /*
     Week prediction
      */
-    if(extrapolationDuration.equals("W"))
+    else if(extrapolationDuration.equals("W"))
     {
       val labeledLogs = DataPreparation.labeledPointRDD(Logs.filter(line => line.dateTime.
         isAfter(time.minusWeeks(1))))
@@ -67,7 +78,7 @@ object GeneratePredictions {
     /*
     Fortnight prediction
      */
-    if(extrapolationDuration.equals("F"))
+    else if(extrapolationDuration.equals("F"))
     {
       val labeledLogs = DataPreparation.labeledPointRDD(Logs.filter(line => line.dateTime.
         isAfter(time.minusWeeks(2))))
@@ -78,7 +89,7 @@ object GeneratePredictions {
     /*
     Day prediction
      */
-    if(extrapolationDuration.equals("D"))
+    else if(extrapolationDuration.equals("D"))
     {
       val labeledLogs = DataPreparation.labeledPointRDD(Logs.filter(line => line.dateTime.
         isAfter(time.minusDays(1))))

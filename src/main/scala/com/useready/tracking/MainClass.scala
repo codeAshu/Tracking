@@ -15,7 +15,7 @@ object MainClass {
     //This is only added for windows 8.1, its a bug in Spark and this workaround is find here
     //http://apache-spark-user-list.1001560.n3.nabble.com/rdd-saveAsTextFile-problem-td176.html
     System.setProperty("hadoop.home.dir", "winutil\\")  //comment out for linux
-    val sc = new SparkContext("local", "extrapolatio")
+    val sc = new SparkContext("local", "extrapolation")
 
     //decide time, worker, algo, to run the prediction
     //write all modifiable parameters here, which may also be exposed to user
@@ -29,7 +29,7 @@ object MainClass {
     val interval = 2  //interval at which logs are collected
 
 
-    //generate all cpu predictions by day, week, fortnight, month and year
+    //generate all cpu predictions by day, week, fortnight, month and year for a worker
     GenerateAllPredictions.GeneratePredictionHof(sc,worker,interval,algo,time,CPU.name,cpuPath,
     CPU.parser,CPU.fileCreater,CPU.logWriter)
 
