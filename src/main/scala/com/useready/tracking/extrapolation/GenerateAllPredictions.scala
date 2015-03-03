@@ -35,17 +35,17 @@ object GenerateAllPredictions {
     try {
 
       //parse
-      val diskLogs = sc.textFile(path).map(parser)
+      val logs = sc.textFile(path).map(parser)
         .filter(line => line.worker != "x")
         .cache()
 
       //create file for real logs
-      fileCreater(diskLogs)
+      fileCreater(logs)
 
       //generate prediction
       for (flag <- durationFlags) {
 
-        val predictionPoint = GeneratePredictions.getPrediction(diskLogs, sc, algo, flag, time)
+        val predictionPoint = GeneratePredictions.getPrediction(counter,logs, sc, algo, flag, time)
 
         if (predictionPoint != null) {
 

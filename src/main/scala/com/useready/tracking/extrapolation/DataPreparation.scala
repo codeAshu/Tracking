@@ -44,7 +44,7 @@ object DataPreparation {
       val labeledLogs = used
         .zipWithIndex()
         .map { line =>
-        val vec = Vectors.dense(line._2.toDouble)
+        val vec = Vectors.dense(line._2)
         LabeledPoint(line._1, vec)
       }.cache()
       labeledLogs

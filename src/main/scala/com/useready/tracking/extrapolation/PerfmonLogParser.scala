@@ -19,7 +19,7 @@ case class Log(worker: String, dateTime: DateTime,
                            total: Double, used: Double, available: Double, flag: String )
 
 class DiskLog(worker: String, dateTime: DateTime,
-              total: Double, used: Double, available: Double,
+              total: Long, used: Long, available: Long,
               flag: String ) extends Log(worker: String, dateTime: DateTime,
   total: Double, used: Double, available: Double, flag: String )
 /**
@@ -141,7 +141,6 @@ def parseRAMProcessLog(line: RAMProcessLog) :RAMLog ={
     try{
       val logVec = log.split(",").toVector
       var strDateTime = logVec(1).replaceAll("^\"|\"$", "")
-      strDateTime = strDateTime.replaceAll("-"," ")
       val dateTime = fm.parseDateTime(strDateTime)
       //unquote the string
       var total:String = logVec(2).trim().replaceAll("^\"|\"$", "")
@@ -184,7 +183,7 @@ def parseRAMProcessLog(line: RAMProcessLog) :RAMLog ={
       println(avail+" avail")
 
       //return the class object
-     new DiskLog(logVec(0), dateTime, total.toDouble, used.toDouble, avail.toDouble,"R")
+     new DiskLog(logVec(0), dateTime, total.toLong, used.toLong, avail.toLong,"R")
 
     }catch {
       case e: Exception =>

@@ -114,4 +114,4 @@ class extrapolationSuit extends FunSuite with BeforeAndAfterEach with LocalSpark
   //TODO: write function and validation tests for algorithms
 }
 
-  
+

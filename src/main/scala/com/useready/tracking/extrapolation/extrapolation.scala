@@ -18,7 +18,8 @@ object extrapolation {
    * @return
    */
 
-  def extrapolateLogs(logs: RDD[LabeledPoint],
+  def extrapolateLogs(counter: String,
+                      logs: RDD[LabeledPoint],
                       sc: SparkContext,
                       extrapolationType: String) : IndexedSeq[(Double,Double)] = {
 
@@ -32,12 +33,12 @@ object extrapolation {
     var model: GeneralizedLinearModel = null
 
     if(extrapolationType.equals("ridge"))
-      model = extrapolation.extrapolateRidge(logs, sc)
+      model = extrapolation.extrapolateRidge(counter,logs, sc)
 
     else if(extrapolationType.equals("lasso"))
-      model = extrapolation.extrapolateLasso(logs, sc)
+      model = extrapolation.extrapolateLasso(counter,logs, sc)
 
-    else model = extrapolation.extrapolateLinear(logs, sc)
+    else model = extrapolation.extrapolateLinear(counter,logs, sc)
 
     println("regression model: " +model)
 
@@ -55,10 +56,17 @@ object extrapolation {
    * @param sc : SparkContext
    * @return Linear regression model
    */
-  def extrapolateLinear(parsedData: RDD[LabeledPoint], sc:SparkContext): LinearRegressionModel = {
-
+  def extrapolateLinear(counter: String ,
+                        parsedData: RDD[LabeledPoint],
+                        sc:SparkContext): LinearRegressionModel = {
+    var stepSize = 0.001
+    counter match {
+      case "CPU" => stepSize = CPU.extrpolateStepSize
+      case "DISK" => stepSize = DISK.extrpolateStepSize
+      case "RAM" => stepSize = RAM.extrpolateStepSize
+    }
     val algorithm = new LinearRegressionWithSGD()
-    algorithm.optimizer.setStepSize(0.01)
+    algorithm.optimizer.setStepSize(stepSize)
     algorithm.optimizer.setNumIterations(100)
     algorithm.optimizer.setUpdater(new SimpleUpdater())
 
@@ -85,10 +93,19 @@ object extrapolation {
    * @param sc : SparkContext
    * @return Ridge regression model
    */
-  def extrapolateRidge(parsedData: RDD[LabeledPoint], sc:SparkContext): RidgeRegressionModel = {
+  def extrapolateRidge(counter: String,
+                       parsedData: RDD[LabeledPoint],
+                       sc:SparkContext): RidgeRegressionModel = {
+
+    var stepSize = 0.001
+    counter match {
+      case "CPU" => stepSize = CPU.extrpolateStepSize
+      case "DISK" => stepSize = DISK.extrpolateStepSize
+      case "RAM" => stepSize = RAM.extrpolateStepSize
+    }
 
     val algorithm = new RidgeRegressionWithSGD()
-    algorithm.optimizer.setStepSize(0.01)
+    algorithm.optimizer.setStepSize(stepSize)
     algorithm.optimizer.setNumIterations(100)
     algorithm.optimizer.setUpdater(new SquaredL2Updater())
     algorithm.optimizer.setRegParam(1.0)
@@ -117,10 +134,19 @@ object extrapolation {
    * @param sc : SparkContext
    * @return Lasso regression model
    */
-  def extrapolateLasso(parsedData: RDD[LabeledPoint], sc:SparkContext): LassoModel = {
+  def extrapolateLasso(counter: String,
+                       parsedData: RDD[LabeledPoint],
+                       sc:SparkContext): LassoModel = {
+
+    var stepSize = 0.001
+    counter match {
+      case "CPU" => stepSize = CPU.extrpolateStepSize
+      case "DISK" => stepSize = DISK.extrpolateStepSize
+      case "RAM" => stepSize = RAM.extrpolateStepSize
+    }
 
     val algorithm = new LassoWithSGD()
-    algorithm.optimizer.setStepSize(0.01)
+    algorithm.optimizer.setStepSize(stepSize)
     algorithm.optimizer.setNumIterations(100)
     algorithm.optimizer.setUpdater(new L1Updater())
     algorithm.optimizer.setRegParam(0.1)

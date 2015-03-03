@@ -1,0 +1,10 @@
+Threshold crossed for CPU with Y data?: false
+Threshold crossed for CPU with Q data?: false
+Threshold crossed for CPU with M data?: false
+Threshold crossed for CPU with F data?: false
+Threshold crossed for RAM with Y data?: false
+Threshold crossed for RAM with Q data?: false
+Threshold crossed for RAM with M data?: false
+Threshold crossed for DISK with Y data?: true
+Threshold crossed for DISK with Q data?: true
+Threshold crossed for DISK with M data?: false

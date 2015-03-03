@@ -25,7 +25,7 @@ object MainClass {
 
     val time =  DateTime.now()
     val worker = "w1"
-    val algo = "ridge"
+    val algo = "linear"
     val interval = 2  //interval at which logs are collected
 
 

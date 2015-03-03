@@ -16,8 +16,8 @@ object PerfmonLogWriter {
 
 
   val totalCPU = 100 //percentage
-  val totalRAM = 117000000000.00 //bytes           //TODO:populate these values from msinfo32file and make available
-  val totalDisk = 11450000000000.00 //bytes
+  val totalRAM = 117000000000.0 //bytes           //TODO:populate these values from msinfo32file and make available
+  val totalDisk = 485445595136l //bytes
   val format = new java.text.SimpleDateFormat("dd-MM-yyyy")
   val fm = DateTimeFormat.forPattern("MM/dd/yyyy HH:mm:ss.SSS")
   val cpuPath =  "output/CPU/"                                          //global path for output
@@ -25,8 +25,9 @@ object PerfmonLogWriter {
   val diskPath = "output/DISK/"
 
   def createDiskFile(diskLog: RDD[Log]) = {
-    val logWritable = diskLog.map(line => Array(line.worker,line.dateTime.toString(fm),line.total,line.used,
-      line.available,line.flag)
+    val logWritable = diskLog.map(line => Array(line.worker,line.dateTime.toString(fm),line.total.toLong,
+      line.used.toLong,
+      line.available.toLong,line.flag)
       .mkString(",")).collect()
 
     val filename = (diskPath+"DISKX.csv")
@@ -120,9 +121,10 @@ object PerfmonLogWriter {
     val dateTime = time.plusSeconds(used._1.toInt * interval)
     val dateTimeStr = dateTime.toString(fm)
     val avail = totalCPU - used._2
-
-    Array(worker,dateTimeStr,totalCPU,used._2,avail, flag).mkString(",")
-
+    if(avail>0)
+      Array(worker,dateTimeStr,totalCPU,used._2,avail, flag).mkString(",")
+    else
+      Array(worker,dateTimeStr,totalCPU,used._2,0., flag).mkString(",")
   }
 
   def diskLogWriter(used: (Double,Double), worker: String, interval: Int, flag: String, time: DateTime ) ={
@@ -130,9 +132,10 @@ object PerfmonLogWriter {
     val dateTime = time.plusSeconds(used._1.toInt * interval)
     val dateTimeStr = dateTime.toString(fm)
     val avail = totalDisk - used._2
-
-    Array(worker,dateTimeStr,totalDisk,used._2,avail, flag).mkString(",")
-
+    if(avail>0)
+      Array(worker,dateTimeStr,totalDisk,used._2.toLong,avail.toLong, flag).mkString(",")
+    else
+      Array(worker,dateTimeStr,totalDisk,used._2.toLong,0l, flag).mkString(",")
   }
 
   def ramLogWriter(used: (Double,Double), worker: String, interval: Int, flag: String, time: DateTime) = {
@@ -140,7 +143,10 @@ object PerfmonLogWriter {
     val dateTime = time.plusSeconds(used._1.toInt * interval)
     val dateTimeStr = dateTime.toString(fm)
     val avail = totalRAM - used._2
-    Array(worker,dateTimeStr,totalRAM,used._2,avail, flag).mkString(",")
+    if(avail>0)
+      Array(worker,dateTimeStr,totalRAM,used._2,avail, flag).mkString(",")
+    else
+      Array(worker,dateTimeStr,totalRAM,used._2,0, flag).mkString(",")
   }
 
 }
