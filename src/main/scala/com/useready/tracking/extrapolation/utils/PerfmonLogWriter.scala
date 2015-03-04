@@ -3,7 +3,7 @@ package com.useready.tracking.utils
 
 import java.io.{FileWriter, File}
 
-import com.useready.tracking.{Log, DiskLog, CPULog, RAMLog}
+import com.useready.tracking._
 import org.apache.spark.rdd.RDD
 import org.joda.time.{DateTimeZone, DateTime}
 import org.joda.time.format.DateTimeFormat
@@ -16,8 +16,8 @@ object PerfmonLogWriter {
 
 
   val totalCPU = 100 //percentage
-  val totalRAM = 117000000000.0 //bytes           //TODO:populate these values from msinfo32file and make available
-  val totalDisk = 485445595136l //bytes
+  val totalRAM = RAM.total //bytes           //TODO:populate these values from msinfo32file and make available
+  val totalDisk = DISK.total //bytes
   val format = new java.text.SimpleDateFormat("dd-MM-yyyy")
   val fm = DateTimeFormat.forPattern("MM/dd/yyyy HH:mm:ss.SSS")
   val cpuPath =  "output/CPU/"                                          //global path for output

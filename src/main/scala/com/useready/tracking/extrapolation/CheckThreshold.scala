@@ -16,8 +16,8 @@ object CheckThreshold {
 
     counter match {
       case "CPU" =>  predictedValues.max > CPU.threshold
-      case "DISK" => predictedValues.max > DISK.threshold
-      case "RAM" => predictedValues.max > RAM.threshold
+      case "DISK" => predictedValues.max > (DISK.threshold * DISK.total) / 100
+      case "RAM" => predictedValues.max > (RAM.threshold * RAM.total) / 100
       case _ =>false
     }
 

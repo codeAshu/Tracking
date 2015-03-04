@@ -25,8 +25,8 @@ object MainClass {
 
     val time =  DateTime.now()
     val worker = "w1"
-    val algo = "linear"
-    val interval = 2  //interval at which logs are collected
+    val algo = "ridge"
+    val interval = 1  //interval at which logs are collected
 
 
     //generate all cpu predictions by day, week, fortnight, month and year for a worker

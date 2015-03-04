@@ -108,7 +108,7 @@ object extrapolation {
     algorithm.optimizer.setStepSize(stepSize)
     algorithm.optimizer.setNumIterations(100)
     algorithm.optimizer.setUpdater(new SquaredL2Updater())
-    algorithm.optimizer.setRegParam(1.0)
+    algorithm.optimizer.setRegParam(100.0)
 
     val model = algorithm.run(parsedData)
 
@@ -149,7 +149,7 @@ object extrapolation {
     algorithm.optimizer.setStepSize(stepSize)
     algorithm.optimizer.setNumIterations(100)
     algorithm.optimizer.setUpdater(new L1Updater())
-    algorithm.optimizer.setRegParam(0.1)
+    algorithm.optimizer.setRegParam(100.0)
 
     val model = algorithm.run(parsedData)
 

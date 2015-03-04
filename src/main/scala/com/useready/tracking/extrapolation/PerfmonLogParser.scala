@@ -12,6 +12,7 @@ flag meaning:
   W - Weekly prediction
   M - monthly prediction
   F - fortnight prediction
+  Q - quarterly prediction
   Y - yearly prediction
  */
 
@@ -56,7 +57,7 @@ def parseRAMProcessLog(line: RAMProcessLog) :RAMLog ={
     val used = line.dataserver +line.wgserver + line.vizqlserver + line.backgrounder +
       line.postgres + line.deserver64 + line.otherProcess
 
-    val available = line.total - used
+    val available = RAM.total - used
 
    new RAMLog(line.worker, line.dateTime, line.total, used, available, "R")
   }
