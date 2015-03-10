@@ -13,16 +13,14 @@ import org.joda.time.format.DateTimeFormat
  */
 object PerfmonLogWriter {
 
-
-
   val totalCPU = 100 //percentage
   val totalRAM = RAM.total //bytes           //TODO:populate these values from msinfo32file and make available
   val totalDisk = DISK.total //bytes
   val format = new java.text.SimpleDateFormat("dd-MM-yyyy")
   val fm = DateTimeFormat.forPattern("MM/dd/yyyy HH:mm:ss.SSS")
-  val cpuPath =  "output/CPU/"                                          //global path for output
-  val ramPath =  "output/RAM/"
-  val diskPath = "output/DISK/"
+  val cpuPath =  "output/Extrapolation/CPU/"                                          //global path for output
+  val ramPath =  "output/Extrapolation/RAM/"
+  val diskPath = "output/Extrapolation/DISK/"
 
   def createDiskFile(diskLog: RDD[Log]) = {
     val logWritable = diskLog.map(line => Array(line.worker,line.dateTime.toString(fm),line.total.toLong,
@@ -60,7 +58,7 @@ object PerfmonLogWriter {
       line.available,line.flag)
       .mkString(",")).collect()
 
-    //this will create a file each time
+    //this will create a file each duration
     val filename = (ramPath+"RAMX.csv")
     val outFile = new File(filename)
     printToFile(outFile) { p =>

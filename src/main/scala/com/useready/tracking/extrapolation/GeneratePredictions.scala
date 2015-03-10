@@ -6,7 +6,7 @@ import org.joda.time.DateTime
 
 object GeneratePredictions {
   /**
-   * This function calls the data preparation function and extrapolation algorithm for the time duration
+   * This function calls the data preparation function and extrapolation algorithm for the duration duration
    * given by extrapolationDuration
    * @param Logs RDD of class CpuLogs
    * @param sc Spark Context
@@ -36,7 +36,7 @@ object GeneratePredictions {
 //         isAfter( DateTime.now.minusYears(1) )),25)
 
 //      val labeledLogs = DataPreparation.labeledPointRDDMovingAverage(Logs.filter(line => line.dateTime.
-//        isAfter(time.minusYears(1))),25)
+//        isAfter(duration.minusYears(1))),25)
 
       val labeledLogs = DataPreparation.labeledPointRDD(Logs.filter(line => line.dateTime.
        isAfter(time.minusYears(1))))

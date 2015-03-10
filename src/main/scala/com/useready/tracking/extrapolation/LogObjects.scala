@@ -9,10 +9,6 @@ import com.useready.tracking.utils.PerfmonLogWriter
 //TODO: get thresholds and total from msinfo32
 object CPU {
 
-
-  //"CPU",sc,worker,interval,algo,time,cpuPath,
-  //  PerfmonLogs.parseCPULogLine,PerfmonLogWriter.createCPUFile,
-  //  GeneratePredictions.getPrediction,PerfmonLogWriter.cpuLogWriter
   val name = "CPU"
   val threshold = 80.0 //percent
   val parser = PerfmonLogs.parseCPULogLine(_)
@@ -22,11 +18,6 @@ object CPU {
 }
 
 object RAM {
-
-
-  //"CPU",sc,worker,interval,algo,time,cpuPath,
-  //  PerfmonLogs.parseCPULogLine,PerfmonLogWriter.createCPUFile,
-  //  GeneratePredictions.getPrediction,PerfmonLogWriter.cpuLogWriter
 
   val name = "RAM"
   val threshold = 80.0 //percent
@@ -38,11 +29,6 @@ object RAM {
 }
 
 object DISK {
-
-
-  //"CPU",sc,worker,interval,algo,time,cpuPath,
-  //  PerfmonLogs.parseCPULogLine,PerfmonLogWriter.createCPUFile,
-  //  GeneratePredictions.getPrediction,PerfmonLogWriter.cpuLogWriter
 
   val name = "DISK"
   val threshold = 80.0 //percent
