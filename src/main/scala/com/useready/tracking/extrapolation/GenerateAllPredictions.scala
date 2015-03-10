@@ -8,7 +8,7 @@ import org.apache.spark.rdd.RDD
 
 object GenerateAllPredictions {
 
-  var thresholdWriter = new PrintWriter("output/logfile.txt")
+  var thresholdWriter = new PrintWriter("output/Extrapolation/logfile.txt")
   val durationFlags = List("Y","Q","M","F","W","D")
 
   /**
@@ -21,7 +21,7 @@ object GenerateAllPredictions {
     val p = new java.io.PrintWriter(f)
     try { op(p) } finally { p.close() }
   }
-  def GeneratePredictionHof(sc: SparkContext,
+  def generatePredictionHof(sc: SparkContext,
           worker : String,
           interval :Int,
           algo :String,

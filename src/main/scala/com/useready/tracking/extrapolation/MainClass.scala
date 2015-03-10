@@ -17,7 +17,7 @@ object MainClass {
     System.setProperty("hadoop.home.dir", "winutil\\")  //comment out for linux
     val sc = new SparkContext("local", "extrapolation")
 
-    //decide time, worker, algo, to run the prediction
+    //decide duration, worker, algo, to run the prediction
     //write all modifiable parameters here, which may also be exposed to user
     val diskPath = "data/DISK.csv"
     val ramPath = "data/RAM.csv"
@@ -30,13 +30,13 @@ object MainClass {
 
 
     //generate all cpu predictions by day, week, fortnight, month and year for a worker
-    GenerateAllPredictions.GeneratePredictionHof(sc,worker,interval,algo,time,CPU.name,cpuPath,
+    GenerateAllPredictions.generatePredictionHof(sc,worker,interval,algo,time,CPU.name,cpuPath,
     CPU.parser,CPU.fileCreater,CPU.logWriter)
 
-    GenerateAllPredictions.GeneratePredictionHof(sc,worker,interval,algo,time,RAM.name,ramPath,
+    GenerateAllPredictions.generatePredictionHof(sc,worker,interval,algo,time,RAM.name,ramPath,
       RAM.parser,RAM.fileCreater,RAM.logWriter)
 
-    GenerateAllPredictions.GeneratePredictionHof(sc,worker,interval,algo,time,DISK.name,diskPath,
+    GenerateAllPredictions.generatePredictionHof(sc,worker,interval,algo,time,DISK.name,diskPath,
       DISK.parser,DISK.fileCreater,DISK.logWriter)
 
     //close open file pointers

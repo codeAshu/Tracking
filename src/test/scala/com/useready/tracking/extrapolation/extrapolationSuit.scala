@@ -57,7 +57,7 @@ class perfmonLogParserSuit extends FunSuite with BeforeAndAfterEach {
       val time = DateTime.now()
       intercept[TestFailedException] {
         intercept[IOException] {
-          GenerateAllPredictions.GeneratePredictionHof(sc, worker, interval, algo, time, name, filePath,
+          GenerateAllPredictions.generatePredictionHof(sc, worker, interval, algo, time, name, filePath,
             parser, fileCreater, logWriter)
         }
       }
