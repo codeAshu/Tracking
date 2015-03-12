@@ -58,7 +58,7 @@ object PerfmonLogWriter {
       line.available,line.flag)
       .mkString(",")).collect()
 
-    //this will create a file each duration
+    //this will create a file each period
     val filename = (ramPath+"RAMX.csv")
     val outFile = new File(filename)
     printToFile(outFile) { p =>

@@ -17,7 +17,7 @@ object MainClass {
     System.setProperty("hadoop.home.dir", "winutil\\")  //comment out for linux
     val sc = new SparkContext("local", "extrapolation")
 
-    //decide duration, worker, algo, to run the prediction
+    //decide period, worker, algo, to run the prediction
     //write all modifiable parameters here, which may also be exposed to user
     val diskPath = "data/DISK.csv"
     val ramPath = "data/RAM.csv"
