@@ -18,6 +18,6 @@ libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.0" % "test"
 
 libraryDependencies += "postgresql" % "postgresql" % "9.1-901-1.jdbc4"
 
-libraryDependencies += "joda-duration" % "joda-duration" % "2.7"
+libraryDependencies += "joda-period" % "joda-period" % "2.7"
 
 resolvers += "Akka Repository" at "http://repo.akka.io/releases/"

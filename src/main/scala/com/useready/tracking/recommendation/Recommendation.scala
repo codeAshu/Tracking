@@ -13,38 +13,36 @@ import org.joda.time.DateTime
  */
 object Recommendation {
 
-  //if RAM usages goes beyond 60% of its capacity, return true
+  //if counter usages goes beyond 60% of its capacity, return true
   def crossedCheck(dPoint:Double, total:Double) : Boolean = dPoint > 0.60 * total
 
   /**
    * This function is generaic and generate percentage usage of logs
    * Each log should be of type <worker, DateTime, Total, process(1),process(2) ..... process(N)>
-   * @param logs
-   * @param nCol
-   * @param worker
-   * @param duration
-   * @param schemaString
-   * @param header
-   * @param counter
-   * @param RecommendationTime
-   * @param sqlContext
-   * @param sc
+   * @param logs schema RDD of the Table(file) passed
+   * @param nCol number of columns in the file
+   * @param worker worker name
+   * @param period log time,either morning/day/eve/night
+   * @param schemaString schema of the file,inferred by Spark SQL
+   * @param header SimpleSCV Header for mapping with process
+   * @param counter CPU/DISK/RAM
+   * @param recommendationTime The time at which recommendation is generated
+   * @param sqlContext Spark sql context
+   * @param sc Spark Context
    */
 
   def generateStats(logs: SchemaRDD,
                      nCol: Int,
                      worker : String,
-                     duration: String,
+                     period: String,
                      schemaString: String,
                      header: SimpleCSVHeader,
                      counter: String,
-                     RecommendationTime: DateTime,
+                     recommendationTime: DateTime,
                      sqlContext: SQLContext,
                      sc: SparkContext) ={
 
-
-
-    //get the total RAM
+    //get the total of counter
     val total = logs.map(t=>t(2)).first().toString.toDouble
 
     //create a table from logs RDD, ignore first three columns <worker,datetime,total>
@@ -55,16 +53,16 @@ object Recommendation {
     val myRDD = rows.map(p=>Row.fromSeq(p.toSeq))
 
     // Apply the schema to the RDD.
-    val privateByteSchemaRDD = sqlContext.applySchema(myRDD, schema)
+    val logSchemaRDD = sqlContext.applySchema(myRDD, schema)
 
     // Register the SchemaRDD as a table.
-    privateByteSchemaRDD.registerTempTable("ram")
+    logSchemaRDD.registerTempTable("log")
 
     //select all processes
-    val processRAM = sqlContext.sql("SELECT * FROM ram")
+    val processOfCounter = sqlContext.sql("SELECT * FROM log")
 
     //create a vector of each process
-    val processVec = processRAM.map(t=>t.toVector.map(e=>e.toString))
+    val processVec = processOfCounter.map(t=>t.toVector.map(e=>e.toString))
 
     //create with threshold crossed information
     val threshVec = processVec.map(t=> t.map(x=>x.toDouble).foldLeft(0.)(_+_) )
@@ -99,10 +97,15 @@ object Recommendation {
       .flatMap(w=>w.toSeq)
       .map(w => (w._2,w._1))
       .reduceByKey(_+_)
-       .map(w=> (w._1,w._2/dataCount))
+       .map(w=> (w._1,w._2/dataCount)).cache()
 
       //write contribution to file
-      StatsWriter.counterStatsWriter(totalContr,worker,duration,header,counter, RecommendationTime,sc)
+      StatsWriter.counterStatsWriter(totalContr,worker,period,header,counter, recommendationTime,sc)
+
+      val totalStats =  totalContr.map(w=>StatsWriter.allStatsCompiler(w,worker,period,header,
+        recommendationTime))
+
+      StatsWriter.FileWriter(totalStats,counter,sc)
 
       //print
 //      totalContr.map(w=> (w._1,w._2/dataCount))
