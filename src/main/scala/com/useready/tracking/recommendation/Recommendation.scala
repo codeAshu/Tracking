@@ -33,7 +33,7 @@ object Recommendation {
 
   def generateStats(logs: SchemaRDD,
                      nCol: Int,
-                     worker : String,
+                     worker : Worker,
                      period: String,
                      schemaString: String,
                      header: SimpleCSVHeader,
@@ -68,6 +68,9 @@ object Recommendation {
     val threshVec = processVec.map(t=> t.map(x=>x.toDouble).foldLeft(0.)(_+_) )
     .map( w=> if(crossedCheck(w ,total)) (w,1) else (w,0) )
 
+    val a = threshVec.collect()
+//    a.foreach(println)
+
     // a normalized vector with first element as status(threshhold),Vector(sum, <all other process>)
     //here sum is addition of each process, used for normalization
     val percentVec = processVec.map{t=>
@@ -78,13 +81,13 @@ object Recommendation {
         (1,w) else (0,w) }
 
     //print threshhold vectors
-    threshVec.collect().foreach(println)
+//    threshVec.collect().foreach(println)
     val dataCount = threshVec.count()
 
     //check how much threshold is crossed
     val percentCrossed = (threshVec.map(w=>w._2).fold(0)(_+_).toDouble /dataCount)*100
 
-    println(percentCrossed)
+//    println(percentCrossed)
 
     //if 60% percent of time RAM/Disk/CPU goes beyond 60% of its capacity in a month
     //generate statistics, such as how much is the contribution of each process
@@ -100,9 +103,9 @@ object Recommendation {
        .map(w=> (w._1,w._2/dataCount)).cache()
 
       //write contribution to file
-      StatsWriter.counterStatsWriter(totalContr,worker,period,header,counter, recommendationTime,sc)
+      StatsWriter.counterStatsWriter(totalContr,worker.name,period,header,counter, recommendationTime,sc)
 
-      val totalStats =  totalContr.map(w=>StatsWriter.allStatsCompiler(w,worker,period,header,
+      val totalStats =  totalContr.map(w=>StatsWriter.allStatsCompiler(w,worker.name,period,header,
         recommendationTime))
 
       StatsWriter.FileWriter(totalStats,counter,sc)

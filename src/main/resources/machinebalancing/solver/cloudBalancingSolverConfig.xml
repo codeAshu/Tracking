@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<solver>
+  <!--<environmentMode>FAST_ASSERT</environmentMode>-->
+
+  <!-- Domain model configuration -->
+  <solutionClass>machinebalancing.domain.CloudBalance</solutionClass>
+  <entityClass>machinebalancing.domain.CloudProcess</entityClass>
+
+  <!-- Score configuration -->
+  <scoreDirectorFactory>
+    <scoreDefinitionType>HARD_SOFT</scoreDefinitionType>
+    <!--<easyScoreCalculatorClass>org.optaplanner.examples.CloudBalancingEasyScoreCalculator</easyScoreCalculatorClass>-->
+    <!--<easyScoreCalculatorClass>org.optaplanner.examples.CloudBalancingMapBasedEasyScoreCalculator</easyScoreCalculatorClass>-->
+    <!--<incrementalScoreCalculatorClass>org.optaplanner.examples.CloudBalancingIncrementalScoreCalculator</incrementalScoreCalculatorClass>-->
+    <scoreDrl>machinebalancing/solver/cloudBalancingScoreRules.drl</scoreDrl>
+    <initializingScoreTrend>ONLY_DOWN</initializingScoreTrend>
+    <!--<assertionScoreDirectorFactory>-->
+      <!--<easyScoreCalculatorClass>org.optaplanner.examples.CloudBalancingMapBasedEasyScoreCalculator</easyScoreCalculatorClass>-->
+    <!--</assertionScoreDirectorFactory>-->
+  </scoreDirectorFactory>
+
+  <!-- Optimization algorithms configuration -->
+  <termination>
+    <secondsSpentLimit>120</secondsSpentLimit>
+  </termination>
+  <constructionHeuristic>
+    <constructionHeuristicType>FIRST_FIT_DECREASING</constructionHeuristicType>
+  </constructionHeuristic>
+  <localSearch>
+    <unionMoveSelector>
+      <changeMoveSelector/>
+      <swapMoveSelector/>
+      <pillarChangeMoveSelector/>
+      <pillarSwapMoveSelector/>
+    </unionMoveSelector>
+    <acceptor>
+      <entityTabuSize>7</entityTabuSize>
+    </acceptor>
+    <forager>
+      <acceptedCountLimit>1000</acceptedCountLimit>
+    </forager>
+  </localSearch>
+</solver>
