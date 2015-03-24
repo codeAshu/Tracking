@@ -28,7 +28,7 @@ object DataParser {
 
     val data = logs.map(line => line.split(","))
       .map(line => line
-      .map(w => w.replaceAll("^\"|\"$", "")))           //lines in rows
+      .map(w => w.replaceAll("^\"|\"$", ""))) //lines in rows
 
     //get how many columns are there in the file
     val nColumn = data.take(1)(0).length
@@ -44,8 +44,8 @@ object DataParser {
         schemaString.split(",").map(fieldName => StructField(fieldName, StringType, true)))
 
     // filter the header out
-    val rows = data.filter(line => header(line,"worker") != "worker")
-    val myRDD = rows.map(p=>Row.fromSeq(p.toSeq))
+    val rows = data.filter(line => header(line, "worker") != "worker")
+    val myRDD = rows.map(p => Row.fromSeq(p.toSeq))
 
     // Apply the schema to the RDD.
     val privateByteSchemaRDD = sqlContext.applySchema(myRDD, schema)
@@ -56,36 +56,12 @@ object DataParser {
     // SQL statements can be run by using the sql methods provided by sqlContext.
     val results = sqlContext.sql("SELECT * FROM ramPB")
 
-    val periodList=Seq("mor","day","eve","nig")
-
-    val counter = "RAM"
-    val worker = header(rows.first(),"worker")
-
-    for (period <- periodList){
-      var data :SchemaRDD = null
-
-      //now fetch morining day eve and night data
-      period match {
-        case "mor"=> data = results.filter(t=> fm.parseDateTime( t(1).toString ).getHourOfDay()>=4 &&
-          fm.parseDateTime( t(1).toString ).getHourOfDay()<10)
-
-        case "day"=> data = results.filter(t=> fm.parseDateTime( t(1).toString ).getHourOfDay()>=10 &&
-          fm.parseDateTime( t(1).toString ).getHourOfDay()<16)
-
-        case "eve"=> data = results.filter(t=> fm.parseDateTime( t(1).toString ).getHourOfDay()>=16 &&
-          fm.parseDateTime( t(1).toString ).getHourOfDay()<22)
-
-        case "nig"=> data = results.filter(t=> fm.parseDateTime( t(1).toString ).getHourOfDay()>=22 &&
-          fm.parseDateTime( t(1).toString ).getHourOfDay()<4)
-      }
-
-      if(data.count()>0)
-        Recommendation.generateStats(data,nColumn,worker,period,schemaString,header,counter,
-          recommendationTime,sqlContext,sc)
-    }
-
-
-
+    (results,header,nColumn,schemaString)
   }
+
+
+
+
+
 
 }

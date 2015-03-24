@@ -1,9 +1,11 @@
 package com.useready.tracking.recommendation
 
 import com.useready.tracking.CheckThreshold
+import machinebalancing.app.{CloudBalancingHelloWorld, WorkerGenerator}
+import machinebalancing.domain.{CloudBalance, CloudComputer}
 import org.apache.spark.SparkContext
 import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
+import org.optaplanner.core.api.solver.{Solver, SolverFactory}
 
 // Import Spark SQL data types and Row.
 import org.apache.spark.sql._
@@ -13,30 +15,60 @@ import org.apache.spark.sql._
 
 object MainClassRecom {
 
-  def main(args: Array[String]) {
+  val periodList = Seq("mor", "day", "eve", "nig")
+  val path = "data/"
+  val counterList = List("RAM","DISK")
+  val solverFactory: SolverFactory = SolverFactory.createFromXmlResource("machinebalancing/solver/cloudBalancingSolverConfig.xml")
+  val solver: Solver = solverFactory.buildSolver
 
-    System.setProperty("hadoop.home.dir", "winutil\\")  //comment out for linux
+  def main(args: Array[String]) {
+  System.setProperty("hadoop.home.dir", "winutil\\") //comment out for linux
     val sc = new SparkContext("local", "recom")
     val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+    val recommendationTime = DateTime.now()
+    val workerList = sc.textFile(path + "workers").zipWithIndex()
+    .map(DomainObjectGenerator.createWorker)
+      .filter(w => w.name != "x").collect().toList
 
-    // Create an RDD //TODO: create data file
-//    val diskData = sc.textFile("data/disk_process.csv")
-//    val cpuData = sc.textFile("data/cpu_process.csv")
+    workerList.foreach(w=>println(w.id+ " cpu =>"+ w.cpu
+      + " ram =>"+w.ram+ " disk =>"+ w.disk))
+    for (worker <- workerList) {
+      for (counter <- counterList) {
 
+        val data = sc.textFile(path + worker.name + "-" + counter + ".csv")
+        val (results, header, nColumn, schemaString) = DataParser.
+          Parsedata(data, recommendationTime, sc, sqlContext)
 
-    //currently running with only RAM data for two workers
-    val ramData1 = sc.textFile("data/w1-process.csv")
-    val ramData2 = sc.textFile("data/w2-process.csv")
+//        println(worker)
 
-    val recommendationTime =  DateTime.now()
+        for (period <- periodList) {
+          //get data for a period
+          val periodData: SchemaRDD = PeriodFilter.filterData(period, results)
+          //genrate recommendation stat
+          if (periodData.count() > 0)
+//            Recommendation.generateStats(periodData, nColumn, worker, period, schemaString, header, counter,
+//              recommendationTime, sqlContext, sc)
 
-    //DataParser.Parsedata(cpuData,recommendationTime,sc,sqlContext)
+          //create planner domain objects
+          DomainObjectGenerator.CloudBalanceGenerator(periodData, counter, header, worker, period,nColumn,
+            schemaString, sqlContext,sc)
 
-    DataParser.Parsedata(ramData1,recommendationTime,sc,sqlContext)
-    DataParser.Parsedata(ramData2,recommendationTime,sc,sqlContext)
+        }
+      }
+    }
 
-    //DataParser.Parsedata(diskData,recommendationTime,sc,sqlContext)
+    DomainObjectGenerator.computerList.foreach(w=>println(w.getLabel+ " cpu =>"+ w.getCpuPower
+      + " ram =>"+w.getMemory+ " disk =>"+ w.getNetworkBandwidth))
+    DomainObjectGenerator.processList.foreach(w=>println(w.getLabel+ " cpu =>"+ w.getRequiredCpuPower
+      + " ram =>"+w.getRequiredMemory+ " disk =>"+ w.getRequiredNetworkBandwidth))
 
+    val unsolvedCloudBalance: CloudBalance =  DomainObjectGenerator.createCloudBlance()
+    // Load a problem with 400 computers and 1200 processes
+    // CloudBalance unsolvedCloudBalance = new CloudBalancingGenerator().createCloudBalance(5, 12);
+    // Solve the problem
+    solver.solve(unsolvedCloudBalance)
+    val solvedCloudBalance: CloudBalance = solver.getBestSolution.asInstanceOf[CloudBalance]
+
+    CloudBalancingHelloWorld.toDisplayString(solvedCloudBalance)
   }
-
 }
