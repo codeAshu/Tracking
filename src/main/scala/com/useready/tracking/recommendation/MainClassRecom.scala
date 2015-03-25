@@ -69,6 +69,6 @@ object MainClassRecom {
     solver.solve(unsolvedCloudBalance)
     val solvedCloudBalance: CloudBalance = solver.getBestSolution.asInstanceOf[CloudBalance]
 
-    CloudBalancingHelloWorld.toDisplayString(solvedCloudBalance)
+    println(CloudBalancingHelloWorld.toDisplayString(solvedCloudBalance))
   }
 }
