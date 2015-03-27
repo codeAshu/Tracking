@@ -10,7 +10,7 @@ object PeriodFilter {
   def filterData(period: String, results: SchemaRDD): SchemaRDD ={
     var data :SchemaRDD = null
 
-    //now fetch morining day eve and night data
+    //now fetch morning day eve and night data
     period match {
       case "mor"=> data = results.filter(t=> fm.parseDateTime( t(1).toString ).getHourOfDay()>=4 &&
         fm.parseDateTime( t(1).toString ).getHourOfDay()<10)
@@ -21,8 +21,10 @@ object PeriodFilter {
       case "eve"=> data = results.filter(t=> fm.parseDateTime( t(1).toString ).getHourOfDay()>=16 &&
         fm.parseDateTime( t(1).toString ).getHourOfDay()<22)
 
-      case "nig"=> data = results.filter(t=> fm.parseDateTime( t(1).toString ).getHourOfDay()>=22 &&
-        fm.parseDateTime( t(1).toString ).getHourOfDay()<4)
+      case "nig"=> data = results.filter(t=> fm.parseDateTime( t(1).toString ).getHourOfDay()>=22
+        && fm.parseDateTime( t(1).toString ).getHourOfDay()<24 ||
+        fm.parseDateTime( t(1).toString ).getHourOfDay()>=0 &&
+          fm.parseDateTime( t(1).toString ).getHourOfDay()<4)
     }
   data
   }

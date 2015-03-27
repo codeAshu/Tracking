@@ -1,5 +1,7 @@
 package com.useready.tracking.recommendation
 
+import javax.jdo.annotations.Value
+
 import com.useready.tracking.{DISK, CPU}
 import com.useready.tracking.recommendation.Period.Period
 import machinebalancing.domain.{CloudBalance, CloudProcess, CloudComputer}
